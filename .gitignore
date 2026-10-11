@@ -1,0 +1,30 @@
+@"
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment
+.env
+.env.local
+*.env
+
+# Build output
+dist/
+build/
+
+# Prisma DB files
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+"@ | Out-File -FilePath .gitignore -Encoding utf8
