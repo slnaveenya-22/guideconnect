@@ -1,4 +1,3 @@
-@"
 # Project Decisions
 
 ## Technical
@@ -19,4 +18,3 @@
 - One review per COMPLETED booking
 - Chat enabled after ACCEPTED
 - India only for v1
-"@ | Out-File -FilePath DECISIONS.md -Encoding utf8
