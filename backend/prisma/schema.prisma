@@ -13,6 +13,13 @@ enum Role {
   ADMIN
 }
 
+enum VerificationStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id           Int           @id @default(autoincrement())
   name         String
@@ -23,14 +30,8 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  guideProfile GuideProfile?  
-}
-
-enum VerificationStatus {
-  NOT_SUBMITTED
-  PENDING
-  APPROVED
-  REJECTED
+  guideProfile GuideProfile?
+  reviewsGiven GuideVerification[] @relation("AdminReviews")
 }
 
 model GuideProfile {
@@ -55,6 +56,30 @@ model GuideProfile {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
+  verification       GuideVerification?
+
   @@index([city])
   @@index([verificationStatus])
+}
+
+model GuideVerification {
+  id              Int                @id @default(autoincrement())
+  guideProfileId  Int                @unique
+  guideProfile    GuideProfile       @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+
+  govIdUrl        String
+  credentialsUrl  String?
+  notes           String?            @db.Text
+  status          VerificationStatus @default(PENDING)
+  rejectionReason String?            @db.Text
+
+  submittedAt     DateTime           @default(now())
+  reviewedAt      DateTime?
+  reviewedBy      Int?
+  reviewer        User?              @relation("AdminReviews", fields: [reviewedBy], references: [id])
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status])
 }

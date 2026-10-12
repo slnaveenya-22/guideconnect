@@ -4,7 +4,6 @@ const cors = require('cors');
 
 const app = express();
 
-// Global middleware
 app.use(
   cors({
     origin: 'http://localhost:5173',
@@ -13,24 +12,32 @@ app.use(
 );
 app.use(express.json());
 
-// Health check
+// Health
 app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'GuideConnect API is running',
-  });
+  res.json({ success: true, message: 'GuideConnect API is running' });
 });
 
-// Routes
+// Auth
 const authRoutes = require('./modules/auth/auth.routes');
 app.use('/api/auth', authRoutes);
 
+// Guide own profile
 const guideRoutes = require('./modules/guide/guide.routes');
-const guidePublicRoutes = require('./modules/guide/guide.public.routes');
 app.use('/api/guide', guideRoutes);
+
+// Guides public
+const guidePublicRoutes = require('./modules/guide/guide.public.routes');
 app.use('/api/guides', guidePublicRoutes);
 
-// 404 handler
+// Verification (guide side)
+const verificationRoutes = require('./modules/verification/verification.routes');
+app.use('/api/guide/verification', verificationRoutes);
+
+// Admin
+const adminRoutes = require('./modules/verification/admin.routes');
+app.use('/api/admin', adminRoutes);
+
+// 404
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -39,7 +46,7 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
+// Error handler
 app.use((err, req, res, next) => {
   console.error('[ERROR]', err.message);
   res.status(err.status || 500).json({
