@@ -17,7 +17,9 @@ const sidebarConfig = {
   ],
   GUIDE: [
     { to: '/guide/dashboard',   icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/guides',            icon: MapPin,          label: 'Explore Guides' },
     { to: '/guide/profile',     icon: User,            label: 'My Profile' },
+    { to: '/guide/verification',icon: ShieldCheck,     label: 'Verification' },
     { to: '/guide/experiences', icon: Briefcase,       label: 'Experiences' },
     { to: '/guide/availability',icon: Calendar,        label: 'Availability' },
     { to: '/guide/bookings',    icon: MessageSquare,   label: 'Booking Requests' },
@@ -25,6 +27,7 @@ const sidebarConfig = {
   ],
   ADMIN: [
     { to: '/admin/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/guides',              icon: MapPin,          label: 'Explore Guides' },
     { to: '/admin/verifications', icon: ShieldCheck,     label: 'Verifications' },
     { to: '/admin/users',         icon: Users,           label: 'Users' },
     { to: '/admin/reports',       icon: Flag,            label: 'Reports' },
@@ -54,7 +57,19 @@ export default function DashboardLayout({ children, title, subtitle }) {
       {/* ───── SIDEBAR ───── */}
       <aside className="gc-sidebar">
         {/* Brand */}
-        <Link to="/" className="d-flex align-items-center gap-2 px-2 mb-4">
+        <Link
+          to="/"
+          className="d-flex align-items-center gap-2 px-2 mb-4"
+          title="Go to Home"
+          style={{
+            textDecoration: 'none',
+            padding: '0.5rem',
+            borderRadius: 10,
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--gc-bg)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+        >
           <span className="gc-logo-mark" style={{ width: 28, height: 28 }}>
             <Compass size={15} />
           </span>

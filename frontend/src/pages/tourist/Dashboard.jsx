@@ -2,14 +2,15 @@ import { Link } from 'react-router-dom';
 import { LayoutDashboard, MapPin, Calendar, MessageSquare, Star, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/DashboardLayout';
+import { getGreeting, getGreetingEmoji } from '../../utils/greeting';
 
 export default function TouristDashboard() {
   const { user } = useAuth();
 
   return (
     <DashboardLayout
-      title={`Hello, ${user?.name?.split(' ')[0] || 'Traveler'} 👋`}
-      subtitle="Ready for your next adventure?"
+  title={`${getGreeting()}, ${user?.name?.split(' ')[0] || 'Traveler'} ${getGreetingEmoji()}`}
+  subtitle="Ready for your next adventure?"
     >
       {/* Quick stats */}
       <div className="row g-3 mb-4">

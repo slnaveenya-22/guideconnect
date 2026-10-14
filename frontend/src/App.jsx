@@ -14,6 +14,10 @@ import TouristDashboard from './pages/tourist/Dashboard';
 import GuideDashboard from './pages/guide/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 
+import GuideProfile from './pages/GuideProfile';
+import GuideProfileManage from './pages/guide/Profile';
+import GuideVerification from './pages/guide/Verification';
+
 function Layout() {
   const location = useLocation();
   const path = location.pathname;
@@ -69,6 +73,18 @@ function Layout() {
                 <AdminDashboard />
               </ProtectedRoute>
             }
+          />
+          {/* Public guide profile */}
+          <Route path="/guides/:id" element={<GuideProfile />} />
+
+          {/* Guide manage pages (inside sidebar zone) */}
+          <Route
+            path="/guide/profile"
+            element={<ProtectedRoute roles={['GUIDE']}><GuideProfileManage /></ProtectedRoute>}
+          />
+          <Route
+            path="/guide/verification"
+            element={<ProtectedRoute roles={['GUIDE']}><GuideVerification /></ProtectedRoute>}
           />
 
           {/* ───── 404 ───── */}

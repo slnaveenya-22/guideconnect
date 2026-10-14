@@ -1,15 +1,16 @@
 import { ShieldCheck, Users, Flag, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/DashboardLayout';
+import { getGreeting, getGreetingEmoji } from '../../utils/greeting';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
 
   return (
     <DashboardLayout
-      title="Admin Dashboard"
-      subtitle={`Signed in as ${user?.name || 'Administrator'}`}
-    >
+  title={`${getGreeting()}, ${user?.name?.split(' ')[0] || 'Admin'} ${getGreetingEmoji()}`}
+  subtitle="Here's what's happening on GuideConnect"
+>
       <div className="row g-3 mb-4">
         <div className="col-6 col-md-3">
           <div className="gc-stat">
