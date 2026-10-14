@@ -20,15 +20,25 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum ExperienceCategory {
+  FOOD
+  HERITAGE
+  SHOPPING
+  CULTURE
+  SIGHTSEEING
+  NATURE
+  OTHER
+}
+
 model User {
-  id           Int           @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   name         String
-  email        String        @unique
+  email        String   @unique
   passwordHash String
-  role         Role          @default(TOURIST)
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  role         Role     @default(TOURIST)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   guideProfile GuideProfile?
   reviewsGiven GuideVerification[] @relation("AdminReviews")
@@ -57,6 +67,7 @@ model GuideProfile {
   updatedAt          DateTime           @updatedAt
 
   verification       GuideVerification?
+  experiences        Experience[]
 
   @@index([city])
   @@index([verificationStatus])
@@ -82,4 +93,28 @@ model GuideVerification {
   updatedAt       DateTime           @updatedAt
 
   @@index([status])
+}
+
+model Experience {
+  id                Int                @id @default(autoincrement())
+  guideProfileId    Int
+  guideProfile      GuideProfile       @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+
+  title             String
+  category          ExperienceCategory
+  city              String
+  description       String             @db.Text
+  durationMinutes   Int
+  price             Int
+  maxGroupSize      Int
+  languages         Json
+  images            Json
+  isActive          Boolean            @default(true)
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([city])
+  @@index([category])
+  @@index([isActive])
 }

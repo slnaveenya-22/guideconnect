@@ -21,17 +21,24 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./modules/auth/auth.routes');
 app.use('/api/auth', authRoutes);
 
-// Guide own profile
+// Guide (own profile + own experiences)
 const guideRoutes = require('./modules/guide/guide.routes');
 app.use('/api/guide', guideRoutes);
 
-// Guides public
-const guidePublicRoutes = require('./modules/guide/guide.public.routes');
-app.use('/api/guides', guidePublicRoutes);
+const guideExperienceRoutes = require('./modules/experience/guide-experience.routes');
+app.use('/api/guide/experiences', guideExperienceRoutes);
 
 // Verification (guide side)
 const verificationRoutes = require('./modules/verification/verification.routes');
 app.use('/api/guide/verification', verificationRoutes);
+
+// Guides (public)
+const guidePublicRoutes = require('./modules/guide/guide.public.routes');
+app.use('/api/guides', guidePublicRoutes);
+
+// Experiences (public + guide CRUD)
+const experienceRoutes = require('./modules/experience/experience.routes');
+app.use('/api/experiences', experienceRoutes);
 
 // Admin
 const adminRoutes = require('./modules/verification/admin.routes');
