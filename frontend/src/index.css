@@ -870,3 +870,15 @@ a { text-decoration: none; color: inherit; }
   max-width: 280px;
   margin: 0 auto;
 }
+
+.gc-exp-scroll {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem 1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+.gc-exp-scroll::-webkit-scrollbar { height: 8px; }
+.gc-exp-scroll::-webkit-scrollbar-track { background: #eef2f7; border-radius: 4px; }
+.gc-exp-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }

@@ -6,11 +6,47 @@ import {
 } from 'lucide-react';
 import { getGuideById } from '../api/guides';
 import { useAuth } from '../context/AuthContext';
+import ExperienceCard from '../components/ExperienceCard';
 
 const TABS = ['About', 'Experiences', 'Reviews', 'Availability'];
 
 function initials(name = '') {
   return name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function ExperiencesTab({ guideId }) {
+  const [experiences, setExperiences] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    import('../api/experiences').then(({ getGuideExperiences }) => {
+      getGuideExperiences(guideId)
+        .then(setExperiences)
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    });
+  }, [guideId]);
+
+  if (loading) return <div className="card p-5 text-center text-muted-2">Loading experiences…</div>;
+
+  if (!experiences.length) {
+    return (
+      <div className="card p-5 text-center text-muted-2">
+        <Briefcase size={32} style={{ margin: '0 auto 0.75rem', opacity: 0.4 }} />
+        <p className="mb-0">This guide hasn't listed any experiences yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="row g-3">
+      {experiences.map((exp) => (
+        <div key={exp.id} className="col-md-6">
+          <ExperienceCard exp={exp} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function GuideProfile() {
@@ -183,10 +219,7 @@ export default function GuideProfile() {
           )}
 
           {tab === 'Experiences' && (
-            <div className="card p-5 text-center text-muted-2">
-              <Briefcase size={32} style={{ margin: '0 auto 0.75rem', opacity: 0.4 }} />
-              <p className="mb-0">Experiences will be available in Module 3.</p>
-            </div>
+            <ExperiencesTab guideId={guide.id} />
           )}
 
           {tab === 'Reviews' && (

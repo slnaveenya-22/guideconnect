@@ -1,11 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Search, ShieldCheck, Sparkles, MessageSquare, Headphones,
   MapPin, Calendar, Tag, Star, ArrowRight, Users, Globe2,
   BadgeCheck, Heart, TrendingUp, CalendarCheck, Compass,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ExperienceCard from '../components/ExperienceCard';
 
 const destinations = [
   { name: 'Coimbatore', country: 'India', img: 'https://www.holidify.com/images/bgImages/COIMBATORE.jpg' },
@@ -48,6 +49,42 @@ export default function Home() {
     if (date) params.set('date', date);
     navigate(`/guides?${params.toString()}`);
   }
+
+  function FeaturedExperiences() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    import('../api/experiences').then(({ searchExperiences }) => {
+      searchExperiences({ limit: 6, sort: 'rating' })
+        .then((res) => setItems(res.data || []))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    });
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-5 text-muted-2">Loading experiences…</div>;
+  }
+
+  if (!items.length) {
+    return (
+      <div className="card p-5 text-center text-muted-2">
+        No experiences listed yet. Be the first guide to add one!
+      </div>
+    );
+  }
+
+  return (
+    <div className="gc-exp-scroll">
+      {items.map((exp) => (
+        <div key={exp.id} style={{ flex: '0 0 300px', scrollSnapAlign: 'start' }}>
+          <ExperienceCard exp={exp} showGuide />
+        </div>
+      ))}
+    </div>
+  );
+}
 
   // Role-aware CTA content
   const cta = (() => {
@@ -195,6 +232,23 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+      
+      {/* ───── EXPERIENCES CAROUSEL ───── */}
+      <section className="gc-section" style={{ background: '#f8fafc' }}>
+        <div className="container">
+          <div className="d-flex justify-content-between align-items-end mb-4">
+            <div>
+              <div className="gc-section-title">Experiences Travelers Love</div>
+              <div className="gc-section-sub mb-0">Handpicked adventures from verified local guides</div>
+            </div>
+            <Link to="/guides" className="btn btn-ghost btn-sm">
+              View all <ArrowRight size={14} className="ms-1" />
+            </Link>
+          </div>
+
+          <FeaturedExperiences />
         </div>
       </section>
 

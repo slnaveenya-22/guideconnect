@@ -18,6 +18,11 @@ import GuideProfile from './pages/GuideProfile';
 import GuideProfileManage from './pages/guide/Profile';
 import GuideVerification from './pages/guide/Verification';
 
+import ExperienceDetail from './pages/ExperienceDetail';
+import GuideExperiences from './pages/guide/Experiences';
+import ExperienceNew from './pages/guide/ExperienceNew';
+import ExperienceEdit from './pages/guide/ExperienceEdit';
+
 function Layout() {
   const location = useLocation();
   const path = location.pathname;
@@ -85,6 +90,26 @@ function Layout() {
           <Route
             path="/guide/verification"
             element={<ProtectedRoute roles={['GUIDE']}><GuideVerification /></ProtectedRoute>}
+          />
+
+          {/* Public experiences */}
+          <Route 
+            path="/experiences/:id" 
+            element={<ExperienceDetail />} 
+          />
+
+          {/* Guide manage */}
+          <Route 
+            path="/guide/experiences" 
+            element={<ProtectedRoute roles={['GUIDE']}><GuideExperiences /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/guide/experiences/new" 
+            element={<ProtectedRoute roles={['GUIDE']}><ExperienceNew /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/guide/experiences/:id/edit" 
+            element={<ProtectedRoute roles={['GUIDE']}><ExperienceEdit /></ProtectedRoute>} 
           />
 
           {/* ───── 404 ───── */}

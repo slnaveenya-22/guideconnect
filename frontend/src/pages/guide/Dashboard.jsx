@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/DashboardLayout';
 import { getMyGuideProfile, getMyVerification } from '../../api/guides';
 import { getGreeting, getGreetingEmoji } from '../../utils/greeting';
+import { getMyExperiences } from '../../api/experiences';
 
 function completionOf(profile) {
   if (!profile) return 0;
@@ -24,12 +25,14 @@ export default function GuideDashboard() {
   const [profile, setProfile] = useState(null);
   const [verification, setVerification] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [experiencesCount, setExperiencesCount] = useState(0);
 
   useEffect(() => {
-    Promise.allSettled([getMyGuideProfile(), getMyVerification()])
-      .then(([p, v]) => {
+    Promise.allSettled([getMyGuideProfile(), getMyVerification(), getMyExperiences()])
+      .then(([p, v, e]) => {
         if (p.status === 'fulfilled') setProfile(p.value);
         if (v.status === 'fulfilled') setVerification(v.value);
+        if (e.status === 'fulfilled') setExperiencesCount(e.value.length);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -144,10 +147,10 @@ export default function GuideDashboard() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--gc-navy)' }}>
-                  Add an experience
+                  {experiencesCount === 0 ? 'Add your first experience' : `${experiencesCount} experience${experiencesCount === 1 ? '' : 's'}`}
                 </div>
                 <div style={{ fontSize: '0.82rem', color: 'var(--gc-muted)' }}>
-                  Coming in Module 3
+                  {experiencesCount === 0 ? 'List what you offer to travelers' : 'Manage your listings'}
                 </div>
               </div>
               <ChevronRight size={18} style={{ color: 'var(--gc-muted)' }} />
