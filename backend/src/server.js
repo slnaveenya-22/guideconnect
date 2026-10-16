@@ -37,17 +37,24 @@ app.use('/api/guide/verification', verificationRoutes);
 const guidePublicRoutes = require('./modules/guide/guide.public.routes');
 app.use('/api/guides', guidePublicRoutes);
 
-// Experiences
+// Experiences (public + guide CRUD)
 const experienceRoutes = require('./modules/experience/experience.routes');
 app.use('/api/experiences', experienceRoutes);
 
-// Recommendations
+// Recommendations (public)
 const recommendationRoutes = require('./modules/recommendation/recommendation.routes');
 app.use('/api/recommendations', recommendationRoutes);
 
 // Bookings
 const bookingRoutes = require('./modules/booking/booking.routes');
 app.use('/api/bookings', bookingRoutes);
+
+// Reviews
+const reviewBookingRoutes = require('./modules/review/review.routes');
+app.use('/api/bookings/:id/review', reviewBookingRoutes);
+
+const guideReviewsRoutes = require('./modules/review/guide-reviews.routes');
+app.use('/api/guides/:id/reviews', guideReviewsRoutes);
 
 // Admin
 const adminRoutes = require('./modules/verification/admin.routes');

@@ -53,6 +53,7 @@ model User {
   guideProfile     GuideProfile?
   reviewsGiven     GuideVerification[] @relation("AdminReviews")
   touristBookings  Booking[]           @relation("TouristBookings")
+  reviewsWritten   Review[]            @relation("ReviewsByTourist")
 }
 
 model GuideProfile {
@@ -80,6 +81,7 @@ model GuideProfile {
   verification       GuideVerification?
   experiences        Experience[]
   bookings           Booking[]
+  reviews            Review[]
 
   @@index([city])
   @@index([verificationStatus])
@@ -151,10 +153,31 @@ model Booking {
   guideProfile     GuideProfile  @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
   experience       Experience    @relation(fields: [experienceId], references: [id])
 
+  review           Review?
+
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
   @@index([touristId])
   @@index([guideProfileId])
   @@index([status])
+}
+
+model Review {
+  id              Int          @id @default(autoincrement())
+  bookingId       Int          @unique
+  booking         Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  touristId       Int
+  tourist         User         @relation("ReviewsByTourist", fields: [touristId], references: [id])
+  guideProfileId  Int
+  guideProfile    GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+
+  rating          Int
+  comment         String?      @db.Text
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([guideProfileId])
 }
