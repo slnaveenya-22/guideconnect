@@ -4,7 +4,6 @@ const cors = require('cors');
 
 const app = express();
 
-// Global middleware
 app.use(
   cors({
     origin: 'http://localhost:5173',
@@ -13,12 +12,9 @@ app.use(
 );
 app.use(express.json());
 
-// Health check
+// Health
 app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'GuideConnect API is running',
-  });
+  res.json({ success: true, message: 'GuideConnect API is running' });
 });
 
 // Auth
@@ -37,23 +33,27 @@ app.use('/api/guide/experiences', guideExperienceRoutes);
 const verificationRoutes = require('./modules/verification/verification.routes');
 app.use('/api/guide/verification', verificationRoutes);
 
-// Guides (public listing)
+// Guides (public)
 const guidePublicRoutes = require('./modules/guide/guide.public.routes');
 app.use('/api/guides', guidePublicRoutes);
 
-// Experiences (public + guide CRUD)
+// Experiences
 const experienceRoutes = require('./modules/experience/experience.routes');
 app.use('/api/experiences', experienceRoutes);
 
-// Recommendations (public smart matching)
+// Recommendations
 const recommendationRoutes = require('./modules/recommendation/recommendation.routes');
 app.use('/api/recommendations', recommendationRoutes);
+
+// Bookings
+const bookingRoutes = require('./modules/booking/booking.routes');
+app.use('/api/bookings', bookingRoutes);
 
 // Admin
 const adminRoutes = require('./modules/verification/admin.routes');
 app.use('/api/admin', adminRoutes);
 
-// 404 handler
+// 404
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -62,7 +62,7 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
+// Error handler
 app.use((err, req, res, next) => {
   console.error('[ERROR]', err.message);
   res.status(err.status || 500).json({
