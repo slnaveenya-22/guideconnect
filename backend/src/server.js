@@ -49,6 +49,10 @@ app.use('/api/recommendations', recommendationRoutes);
 const bookingRoutes = require('./modules/booking/booking.routes');
 app.use('/api/bookings', bookingRoutes);
 
+// Itineraries (nested under bookings)
+const itineraryRoutes = require('./modules/itinerary/itinerary.routes');
+app.use('/api/bookings/:id/itinerary', itineraryRoutes);
+
 // Reviews
 const reviewBookingRoutes = require('./modules/review/review.routes');
 app.use('/api/bookings/:id/review', reviewBookingRoutes);

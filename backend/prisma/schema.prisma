@@ -38,6 +38,12 @@ enum BookingStatus {
   COMPLETED
 }
 
+enum SuggestionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model User {
   id           Int      @id @default(autoincrement())
   name         String
@@ -54,6 +60,7 @@ model User {
   reviewsGiven     GuideVerification[] @relation("AdminReviews")
   touristBookings  Booking[]           @relation("TouristBookings")
   reviewsWritten   Review[]            @relation("ReviewsByTourist")
+  itinerarySuggestions ItinerarySuggestion[]
 }
 
 model GuideProfile {
@@ -154,6 +161,7 @@ model Booking {
   experience       Experience    @relation(fields: [experienceId], references: [id])
 
   review           Review?
+  itinerary        Itinerary?
 
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
@@ -180,4 +188,61 @@ model Review {
   updatedAt       DateTime     @updatedAt
 
   @@index([guideProfileId])
+}
+
+model Itinerary {
+  id          Int             @id @default(autoincrement())
+  bookingId   Int             @unique
+  booking     Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  title       String?
+  notes       String?         @db.Text
+
+  items       ItineraryItem[]
+  suggestions ItinerarySuggestion[]
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ItineraryItem {
+  id           Int       @id @default(autoincrement())
+  itineraryId  Int
+  itinerary    Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+
+  order        Int
+  title        String
+  description  String?   @db.Text
+  startTime    String?
+  endTime      String?
+  locationName String?
+  latitude     Float?
+  longitude    Float?
+  notes        String?   @db.Text
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([itineraryId])
+}
+
+model ItinerarySuggestion {
+  id            Int              @id @default(autoincrement())
+  itineraryId   Int
+  itinerary     Itinerary        @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+
+  touristId     Int
+  tourist       User             @relation(fields: [touristId], references: [id])
+
+  title         String
+  description   String?          @db.Text
+  locationName  String?
+
+  status        SuggestionStatus @default(PENDING)
+  guideResponse String?          @db.Text
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([itineraryId])
 }
