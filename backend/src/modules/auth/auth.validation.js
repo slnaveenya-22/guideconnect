@@ -22,4 +22,15 @@ function validateLogin(body) {
   return errors;
 }
 
-module.exports = { validateRegister, validateLogin };
+function validateGoogleLogin(body) {
+  const errors = [];
+  if (!body.idToken || typeof body.idToken !== 'string') {
+    errors.push('Google idToken is required');
+  }
+  if (body.role !== undefined && !['TOURIST', 'GUIDE'].includes(body.role)) {
+    errors.push('Role must be either TOURIST or GUIDE');
+  }
+  return errors;
+}
+
+module.exports = { validateRegister, validateLogin, validateGoogleLogin };

@@ -13,7 +13,11 @@
   "prisma": {
     "seed": "node prisma/seed.js"
   },
-  "keywords": ["guideconnect", "express", "prisma"],
+  "keywords": [
+    "guideconnect",
+    "express",
+    "prisma"
+  ],
   "author": "Naveenya",
   "license": "ISC",
   "dependencies": {
@@ -22,6 +26,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "google-auth-library": "^11.3.1",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {

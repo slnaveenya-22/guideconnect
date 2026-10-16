@@ -1,5 +1,9 @@
-const { registerUser, loginUser } = require('./auth.service');
-const { validateRegister, validateLogin } = require('./auth.validation');
+const { registerUser, loginUser, googleLogin } = require('./auth.service');
+const {
+  validateRegister,
+  validateLogin,
+  validateGoogleLogin,
+} = require('./auth.validation');
 
 async function register(req, res, next) {
   try {
@@ -11,7 +15,6 @@ async function register(req, res, next) {
         code: 'VALIDATION_FAILED',
       });
     }
-
     const user = await registerUser(req.body);
     res.status(201).json({
       success: true,
@@ -33,12 +36,25 @@ async function login(req, res, next) {
         code: 'VALIDATION_FAILED',
       });
     }
-
     const result = await loginUser(req.body);
-    res.json({
-      success: true,
-      data: result,
-    });
+    res.json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function google(req, res, next) {
+  try {
+    const errors = validateGoogleLogin(req.body);
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: errors[0],
+        code: 'VALIDATION_FAILED',
+      });
+    }
+    const result = await googleLogin(req.body);
+    res.json({ success: true, data: result });
   } catch (err) {
     next(err);
   }
@@ -56,4 +72,4 @@ async function me(req, res) {
   });
 }
 
-module.exports = { register, login, me };
+module.exports = { register, login, google, me };
