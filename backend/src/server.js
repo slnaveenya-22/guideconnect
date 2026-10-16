@@ -37,11 +37,11 @@ app.use('/api/guide/verification', verificationRoutes);
 const guidePublicRoutes = require('./modules/guide/guide.public.routes');
 app.use('/api/guides', guidePublicRoutes);
 
-// Experiences (public + guide CRUD)
+// Experiences
 const experienceRoutes = require('./modules/experience/experience.routes');
 app.use('/api/experiences', experienceRoutes);
 
-// Recommendations (public)
+// Recommendations
 const recommendationRoutes = require('./modules/recommendation/recommendation.routes');
 app.use('/api/recommendations', recommendationRoutes);
 
@@ -56,9 +56,13 @@ app.use('/api/bookings/:id/review', reviewBookingRoutes);
 const guideReviewsRoutes = require('./modules/review/guide-reviews.routes');
 app.use('/api/guides/:id/reviews', guideReviewsRoutes);
 
-// Admin
-const adminRoutes = require('./modules/verification/admin.routes');
-app.use('/api/admin', adminRoutes);
+// Admin — verification management
+const adminVerificationRoutes = require('./modules/verification/admin.routes');
+app.use('/api/admin', adminVerificationRoutes);
+
+// Admin — platform moderation
+const adminModerationRoutes = require('./modules/admin/admin.routes');
+app.use('/api/admin', adminModerationRoutes);
 
 // 404
 app.use((req, res) => {
