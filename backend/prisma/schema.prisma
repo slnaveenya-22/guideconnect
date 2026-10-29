@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
 enum Role {
   TOURIST
   GUIDE
@@ -44,22 +48,26 @@ enum SuggestionStatus {
   REJECTED
 }
 
+// ─────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────
+
 model User {
   id           Int      @id @default(autoincrement())
   name         String
   email        String   @unique
   passwordHash String?
   googleId     String?  @unique
-  authProvider String   @default("LOCAL")
+  authProvider String   @default("LOCAL") // "LOCAL" | "GOOGLE"
   role         Role     @default(TOURIST)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  guideProfile     GuideProfile?
-  reviewsGiven     GuideVerification[] @relation("AdminReviews")
-  touristBookings  Booking[]           @relation("TouristBookings")
-  reviewsWritten   Review[]            @relation("ReviewsByTourist")
+  guideProfile         GuideProfile?
+  reviewsGiven         GuideVerification[] @relation("AdminReviews")
+  touristBookings      Booking[]           @relation("TouristBookings")
+  reviewsWritten       Review[]            @relation("ReviewsByTourist")
   itinerarySuggestions ItinerarySuggestion[]
 }
 
@@ -150,10 +158,10 @@ model Booking {
   status           BookingStatus @default(PENDING)
 
   scheduledDate    DateTime
-  startTime        String
+  startTime        String        // "HH:MM"
   durationMinutes  Int
   groupSize        Int
-  agreedPrice      Int
+  agreedPrice      Int           // paise, snapshot at booking time
   message          String?       @db.Text
 
   tourist          User          @relation("TouristBookings", fields: [touristId], references: [id])
@@ -181,7 +189,7 @@ model Review {
   guideProfileId  Int
   guideProfile    GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
 
-  rating          Int
+  rating          Int          // 1–5
   comment         String?      @db.Text
 
   createdAt       DateTime     @default(now())
@@ -213,8 +221,8 @@ model ItineraryItem {
   order        Int
   title        String
   description  String?   @db.Text
-  startTime    String?
-  endTime      String?
+  startTime    String?   // "HH:MM"
+  endTime      String?   // "HH:MM"
   locationName String?
   latitude     Float?
   longitude    Float?
