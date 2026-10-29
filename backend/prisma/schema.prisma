@@ -7,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────────
-// ENUMS
-// ─────────────────────────────────────────────
-
 enum Role {
   TOURIST
   GUIDE
@@ -48,17 +44,13 @@ enum SuggestionStatus {
   REJECTED
 }
 
-// ─────────────────────────────────────────────
-// MODELS
-// ─────────────────────────────────────────────
-
 model User {
   id           Int      @id @default(autoincrement())
   name         String
   email        String   @unique
   passwordHash String?
   googleId     String?  @unique
-  authProvider String   @default("LOCAL") // "LOCAL" | "GOOGLE"
+  authProvider String   @default("LOCAL")
   role         Role     @default(TOURIST)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -69,6 +61,7 @@ model User {
   touristBookings      Booking[]           @relation("TouristBookings")
   reviewsWritten       Review[]            @relation("ReviewsByTourist")
   itinerarySuggestions ItinerarySuggestion[]
+  messagesSent         Message[]
 }
 
 model GuideProfile {
@@ -158,10 +151,10 @@ model Booking {
   status           BookingStatus @default(PENDING)
 
   scheduledDate    DateTime
-  startTime        String        // "HH:MM"
+  startTime        String
   durationMinutes  Int
   groupSize        Int
-  agreedPrice      Int           // paise, snapshot at booking time
+  agreedPrice      Int
   message          String?       @db.Text
 
   tourist          User          @relation("TouristBookings", fields: [touristId], references: [id])
@@ -170,6 +163,7 @@ model Booking {
 
   review           Review?
   itinerary        Itinerary?
+  conversation     Conversation?
 
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
@@ -189,7 +183,7 @@ model Review {
   guideProfileId  Int
   guideProfile    GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
 
-  rating          Int          // 1–5
+  rating          Int
   comment         String?      @db.Text
 
   createdAt       DateTime     @default(now())
@@ -221,8 +215,8 @@ model ItineraryItem {
   order        Int
   title        String
   description  String?   @db.Text
-  startTime    String?   // "HH:MM"
-  endTime      String?   // "HH:MM"
+  startTime    String?
+  endTime      String?
   locationName String?
   latitude     Float?
   longitude    Float?
@@ -253,4 +247,30 @@ model ItinerarySuggestion {
   updatedAt     DateTime         @updatedAt
 
   @@index([itineraryId])
+}
+
+model Conversation {
+  id        Int       @id @default(autoincrement())
+  bookingId Int       @unique
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  messages  Message[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       Int
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String       @db.Text
+  readAt         DateTime?
+
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
 }
