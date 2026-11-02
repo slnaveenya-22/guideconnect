@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  LayoutDashboard, User, Briefcase, Calendar, MessageSquare, Star,
-  ShieldCheck, ChevronRight, CheckCircle2, Clock, XCircle,
+  User, Briefcase, MessageSquare, ChevronRight, Clock, CheckCircle2, ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/DashboardLayout';
 import { getMyGuideProfile, getMyVerification } from '../../api/guides';
-import { getGreeting, getGreetingEmoji } from '../../utils/greeting';
 import { getMyExperiences } from '../../api/experiences';
+import { getMyBookings } from '../../api/bookings';
+import { getGreeting, getGreetingEmoji } from '../../utils/greeting';
 
 function completionOf(profile) {
   if (!profile) return 0;
@@ -22,41 +22,58 @@ function completionOf(profile) {
 
 export default function GuideDashboard() {
   const { user } = useAuth();
+  
   const [profile, setProfile] = useState(null);
   const [verification, setVerification] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [experiencesCount, setExperiencesCount] = useState(0);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.allSettled([getMyGuideProfile(), getMyVerification(), getMyExperiences()])
-      .then(([p, v, e]) => {
+    Promise.allSettled([
+      getMyGuideProfile(), 
+      getMyVerification(), 
+      getMyExperiences(),
+      getMyBookings()
+    ])
+      .then(([p, v, e, b]) => {
         if (p.status === 'fulfilled') setProfile(p.value);
         if (v.status === 'fulfilled') setVerification(v.value);
         if (e.status === 'fulfilled') setExperiencesCount(e.value.length);
+        if (b.status === 'fulfilled') setBookings(b.value);
       })
       .finally(() => setLoading(false));
   }, []);
 
   const completion = completionOf(profile);
   const vStatus = verification?.status || 'NOT_SUBMITTED';
+  
+  const pendingReq = bookings.filter(b => b.status === 'PENDING').length;
+  const activeBookings = bookings.filter(b => b.status === 'ACCEPTED').length;
 
   return (
     <DashboardLayout
-  title={`${getGreeting()}, ${user?.name?.split(' ')[0] || 'Guide'} ${getGreetingEmoji()}`}
-  subtitle="Here's what's happening with your guide account"
->
+      title={`${getGreeting()}, ${user?.name?.split(' ')[0] || 'Guide'} ${getGreetingEmoji()}`}
+      subtitle="Here's what's happening with your guide account"
+    >
       {/* Stats */}
       <div className="row g-3 mb-4">
         <div className="col-6 col-md-3">
           <div className="gc-stat">
-            <div className="gc-stat-label">Active Bookings</div>
-            <div className="gc-stat-value">0</div>
+            <div className="gc-stat-label d-flex align-items-center gap-2">
+              <CheckCircle2 size={14} /> Active Bookings
+            </div>
+            <div className="gc-stat-value">{loading ? '—' : activeBookings}</div>
           </div>
         </div>
         <div className="col-6 col-md-3">
           <div className="gc-stat">
-            <div className="gc-stat-label">Pending Requests</div>
-            <div className="gc-stat-value">0</div>
+            <div className="gc-stat-label d-flex align-items-center gap-2">
+              <Clock size={14} /> Pending Requests
+            </div>
+            <div className="gc-stat-value" style={{ color: pendingReq > 0 ? 'var(--gc-primary)' : 'inherit' }}>
+              {loading ? '—' : pendingReq}
+            </div>
           </div>
         </div>
         <div className="col-6 col-md-3">
@@ -102,12 +119,7 @@ export default function GuideDashboard() {
                   {completion}% complete
                 </div>
                 <div style={{ height: 5, background: '#e2e8f0', borderRadius: 3, marginTop: 6, overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      width: `${completion}%`, height: '100%',
-                      background: completion === 100 ? '#10b981' : 'var(--gc-primary)',
-                    }}
-                  />
+                  <div style={{ width: `${completion}%`, height: '100%', background: completion === 100 ? '#10b981' : 'var(--gc-primary)' }} />
                 </div>
               </div>
               <ChevronRight size={18} style={{ color: 'var(--gc-muted)' }} />
@@ -127,10 +139,7 @@ export default function GuideDashboard() {
                   Get verified
                 </div>
                 <div style={{ fontSize: '0.82rem', color: 'var(--gc-muted)' }}>
-                  {vStatus === 'APPROVED' ? 'Verified ✓' :
-                   vStatus === 'PENDING' ? 'Under review' :
-                   vStatus === 'REJECTED' ? 'Action needed' :
-                   'Not submitted yet'}
+                  {vStatus === 'APPROVED' ? 'Verified ✓' : vStatus === 'PENDING' ? 'Under review' : 'Not submitted yet'}
                 </div>
               </div>
               <ChevronRight size={18} style={{ color: 'var(--gc-muted)' }} />
@@ -162,12 +171,19 @@ export default function GuideDashboard() {
           <h5 style={{ fontWeight: 700, color: 'var(--gc-navy)', marginBottom: '1rem' }}>
             Recent Booking Requests
           </h5>
-          <div className="card p-4 text-center text-muted-2">
+          <div className="card p-4 text-center text-muted-2 h-100 d-flex flex-column justify-content-center">
             <MessageSquare size={28} style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} />
-            <p className="mb-0">No booking requests yet.</p>
-            <p className="mb-0" style={{ fontSize: '0.85rem' }}>
-              Requests will appear once Module 5 is live.
-            </p>
+            {pendingReq === 0 ? (
+              <>
+                <p className="mb-0">No pending requests.</p>
+                <p className="mb-0" style={{ fontSize: '0.85rem' }}>You're all caught up!</p>
+              </>
+            ) : (
+              <>
+                <p className="mb-0" style={{ fontWeight: 700, color: 'var(--gc-primary)' }}>You have {pendingReq} request{pendingReq > 1 ? 's' : ''}!</p>
+                <Link to="/guide/bookings" className="btn btn-sm btn-primary mt-3 mx-auto">Review Now</Link>
+              </>
+            )}
           </div>
         </div>
       </div>

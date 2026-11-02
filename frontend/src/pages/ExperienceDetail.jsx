@@ -6,7 +6,9 @@ import {
 } from 'lucide-react';
 import { getExperienceById } from '../api/experiences';
 import { useAuth } from '../context/AuthContext';
+
 import CategoryBadge from '../components/CategoryBadge';
+import BookingModal from '../components/BookingModal';
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80';
 
@@ -17,6 +19,8 @@ export default function ExperienceDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeImg, setActiveImg] = useState(0);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -152,9 +156,15 @@ export default function ExperienceDetail() {
               <Link to="/login" className="btn btn-primary w-100 mb-2">Sign in to Book</Link>
             )}
             {canBook && (
-              <button className="btn btn-primary w-100 mb-2" disabled title="Available in Module 5">
+              <button className="btn btn-primary w-100 mb-2" onClick={() => setShowBookingModal(true)}>
                 Book This Experience
               </button>
+            )}
+
+            {requestSent && (
+              <div className="alert alert-success py-2 mt-3" style={{ fontSize: '0.85rem' }}>
+                Request sent! Check your dashboard to track it.
+              </div>
             )}
             {!canBook && !isGuest && (
               <button className="btn btn-outline-navy w-100 mb-2" disabled>
@@ -168,6 +178,13 @@ export default function ExperienceDetail() {
           </div>
         </div>
       </div>
+      {showBookingModal && (
+        <BookingModal
+          experience={exp}
+          onClose={() => setShowBookingModal(false)}
+          onSuccess={() => setRequestSent(true)}
+        />
+      )}
     </div>
   );
 }

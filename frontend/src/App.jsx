@@ -22,8 +22,11 @@ import ExperienceDetail from './pages/ExperienceDetail';
 import GuideExperiences from './pages/guide/Experiences';
 import ExperienceNew from './pages/guide/ExperienceNew';
 import ExperienceEdit from './pages/guide/ExperienceEdit';
+import GuideAvailability from './pages/guide/Availability';
 
 import Recommendations from './pages/tourist/Recommendations';
+import TouristBookings from './pages/tourist/Bookings';
+import GuideBookings from './pages/guide/Bookings';
 
 function Layout() {
   const location = useLocation();
@@ -117,6 +120,21 @@ function Layout() {
           <Route
             path="/tourist/recommendations"
             element={<ProtectedRoute roles={['TOURIST']}><Recommendations /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/guide/availability"
+            element={<ProtectedRoute roles={['GUIDE']}><GuideAvailability /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/tourist/bookings"
+            element={<ProtectedRoute roles={['TOURIST']}><TouristBookings /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/guide/bookings"
+            element={<ProtectedRoute roles={['GUIDE']}><GuideBookings /></ProtectedRoute>}
           />
 
           {/* ───── 404 ───── */}
