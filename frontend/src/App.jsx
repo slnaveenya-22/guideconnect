@@ -23,6 +23,8 @@ import GuideExperiences from './pages/guide/Experiences';
 import ExperienceNew from './pages/guide/ExperienceNew';
 import ExperienceEdit from './pages/guide/ExperienceEdit';
 
+import Recommendations from './pages/tourist/Recommendations';
+
 function Layout() {
   const location = useLocation();
   const path = location.pathname;
@@ -110,6 +112,11 @@ function Layout() {
           <Route 
             path="/guide/experiences/:id/edit" 
             element={<ProtectedRoute roles={['GUIDE']}><ExperienceEdit /></ProtectedRoute>} 
+          />
+
+          <Route
+            path="/tourist/recommendations"
+            element={<ProtectedRoute roles={['TOURIST']}><Recommendations /></ProtectedRoute>}
           />
 
           {/* ───── 404 ───── */}

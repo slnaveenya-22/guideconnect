@@ -4,11 +4,13 @@ import {
   Star, User, LogOut, Compass, Briefcase,
   Users, ShieldCheck, BarChart3, Flag,
 } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const sidebarConfig = {
   TOURIST: [
     { to: '/tourist/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/tourist/recommendations', icon: Sparkles, label: 'Smart Match' },
     { to: '/guides',            icon: MapPin,          label: 'Explore Guides' },
     { to: '/tourist/bookings',  icon: Calendar,        label: 'My Bookings' },
     { to: '/tourist/messages',  icon: MessageSquare,   label: 'Messages' },
