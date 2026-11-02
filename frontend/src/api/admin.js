@@ -21,6 +21,6 @@ export async function getAllUsers() {
 }
 
 export async function toggleUserStatus(id, isActive) {
-  const res = await api.patch(`/admin/users/${id}/status`, { isActive });
+  const res = await api.patch(`/admin/users/${id}/suspend`, { isActive });
   return res.data.data;
 }

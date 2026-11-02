@@ -48,13 +48,45 @@ export default function AdminDashboard() {
             <div className="gc-stat-value">{loading ? '—' : stats?.totalBookings || 0}</div>
           </div>
         </div>
+        {/* 1. Total Users */}
+        <div className="col-6 col-md-3">
+          <div className="gc-stat">
+            <div className="gc-stat-label d-flex align-items-center gap-2">
+              <Users size={14} /> Total Users
+            </div>
+            <div className="gc-stat-value">{loading ? '—' : stats?.users?.total || 0}</div>
+          </div>
+        </div>
+
+        {/* 2. Total Guides */}
+        <div className="col-6 col-md-3">
+          <div className="gc-stat">
+            <div className="gc-stat-label d-flex align-items-center gap-2">
+              <Briefcase size={14} /> Total Guides
+            </div>
+            <div className="gc-stat-value">{loading ? '—' : stats?.users?.guides || 0}</div>
+          </div>
+        </div>
+
+        {/* 3. Total Bookings */}
+        <div className="col-6 col-md-3">
+          <div className="gc-stat">
+            <div className="gc-stat-label d-flex align-items-center gap-2">
+              <TrendingUp size={14} /> Total Bookings
+            </div>
+            <div className="gc-stat-value">{loading ? '—' : stats?.bookings?.total || 0}</div>
+          </div>
+        </div>
+
+        {/* 4. Pending Verifications */}
         <div className="col-6 col-md-3">
           <div className="gc-stat">
             <div className="gc-stat-label d-flex align-items-center gap-2 text-warning">
               <ShieldCheck size={14} /> Pending Verifications
             </div>
-            <div className="gc-stat-value" style={{ color: stats?.pendingVerifications > 0 ? '#f59e0b' : 'inherit' }}>
-              {loading ? '—' : stats?.pendingVerifications || 0}
+            {/* Notice the change to stats?.verifications?.pending below */}
+            <div className="gc-stat-value" style={{ color: stats?.verifications?.pending > 0 ? '#f59e0b' : 'inherit' }}>
+              {loading ? '—' : stats?.verifications?.pending || 0}
             </div>
           </div>
         </div>

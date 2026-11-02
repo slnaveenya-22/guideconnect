@@ -32,8 +32,6 @@ const sidebarConfig = {
     { to: '/guides',              icon: MapPin,          label: 'Explore Guides' },
     { to: '/admin/verifications', icon: ShieldCheck,     label: 'Verifications' },
     { to: '/admin/users',         icon: Users,           label: 'Users' },
-    { to: '/admin/reports',       icon: Flag,            label: 'Reports' },
-    { to: '/admin/analytics',     icon: BarChart3,       label: 'Analytics' },
   ],
 };
 
