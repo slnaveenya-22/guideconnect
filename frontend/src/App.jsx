@@ -20,6 +20,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import GuideProfile from './pages/GuideProfile';
 import GuideProfileManage from './pages/guide/Profile';
 import GuideVerification from './pages/guide/Verification';
+import GuideReviews from './pages/guide/Reviews';
 
 import ExperienceDetail from './pages/ExperienceDetail';
 import GuideExperiences from './pages/guide/Experiences';
@@ -29,6 +30,8 @@ import GuideAvailability from './pages/guide/Availability';
 
 import Recommendations from './pages/tourist/Recommendations';
 import TouristBookings from './pages/tourist/Bookings';
+import TouristProfile from './pages/tourist/Profile';
+import TouristReviews from './pages/tourist/Reviews';
 import GuideBookings from './pages/guide/Bookings';
 
 import AdminVerifications from './pages/admin/Verifications';
@@ -181,6 +184,21 @@ function Layout() {
           <Route 
             path="/admin/users" 
             element={<ProtectedRoute roles={['ADMIN']}><AdminUsers /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/tourist/profile" 
+            element={<ProtectedRoute roles={['TOURIST']}><TouristProfile /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/tourist/reviews" 
+            element={<ProtectedRoute roles={['TOURIST']}><TouristReviews /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/guide/reviews" 
+            element={<ProtectedRoute roles={['GUIDE']}><GuideReviews /></ProtectedRoute>} 
           />
 
           {/* ───── 404 ───── */}
