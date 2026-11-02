@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, User, Check, X, Clock } from 'lucide-react';
+import { Calendar, User, Check, X, Clock, MapPin } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { getMyBookings, acceptBooking, rejectBooking } from '../../api/bookings';
 
@@ -111,9 +111,12 @@ export default function GuideBookings() {
                       Tourist: {b.tourist?.name} · {new Date(b.date).toLocaleDateString()} · {b.groupSize} guests
                     </div>
                   </div>
-                  <div>
+                  <div className="d-flex gap-2 mt-2 mt-md-0">
+                    <Link to={`/guide/itinerary/${b.id}`} className="btn btn-sm btn-outline-navy">
+                        <MapPin size={14} className="me-1" /> Build Itinerary
+                    </Link>
                     <Link to={`/guide/messages/${b.id}`} className="btn btn-sm btn-primary">
-                     Message Tourist
+                        Message Tourist
                     </Link>
                   </div>
                 </div>

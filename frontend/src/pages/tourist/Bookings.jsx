@@ -80,9 +80,14 @@ export default function TouristBookings() {
                     </button>
                   )}
                   {b.status === 'ACCEPTED' && (
-                    <Link to={`/tourist/messages/${b.id}`} className="btn btn-sm btn-primary">
-                      Message Guide
-                    </Link>
+                    <div className="d-flex gap-2">
+                      <Link to={`/tourist/itinerary/${b.id}`} className="btn btn-sm btn-outline-navy">
+                        <Calendar size={14} className="me-1" /> Itinerary
+                      </Link>
+                      <Link to={`/tourist/messages/${b.id}`} className="btn btn-sm btn-primary">
+                        Message
+                      </Link>
+                    </div>
                   )}
                 </div>
                 
