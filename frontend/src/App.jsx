@@ -31,6 +31,9 @@ import Recommendations from './pages/tourist/Recommendations';
 import TouristBookings from './pages/tourist/Bookings';
 import GuideBookings from './pages/guide/Bookings';
 
+import AdminVerifications from './pages/admin/Verifications';
+import AdminUsers from './pages/admin/Users';
+
 function Layout() {
   const location = useLocation();
   const path = location.pathname;
@@ -168,6 +171,16 @@ function Layout() {
           <Route 
             path="/guide/itinerary/:bookingId" 
             element={<ProtectedRoute roles={['GUIDE']}><Itinerary /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/admin/verifications" 
+            element={<ProtectedRoute roles={['ADMIN']}><AdminVerifications /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/admin/users" 
+            element={<ProtectedRoute roles={['ADMIN']}><AdminUsers /></ProtectedRoute>} 
           />
 
           {/* ───── 404 ───── */}
