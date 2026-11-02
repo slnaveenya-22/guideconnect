@@ -11,6 +11,9 @@ const { validateCreate, validateReject } = require('./booking.validation');
 
 async function create(req, res, next) {
   try {
+    // 🚨 DEBUG LOG ADDED HERE
+    console.log("🚨 INCOMING BOOKING DATA:", req.body);
+
     const errors = validateCreate(req.body);
     if (errors.length > 0) {
       return res.status(400).json({

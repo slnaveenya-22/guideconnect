@@ -61,13 +61,17 @@ async function createBooking(touristId, data) {
     throw err;
   }
 
+  // Handle both 'scheduledDate' and 'date' sent by frontend
+  const finalDate = data.scheduledDate || data.date;
+  const finalStartTime = data.startTime || '09:00';
+
   const booking = await prisma.booking.create({
     data: {
       touristId,
       guideProfileId: experience.guideProfileId,
       experienceId: experience.id,
-      scheduledDate: new Date(data.scheduledDate),
-      startTime: data.startTime,
+      scheduledDate: new Date(finalDate),
+      startTime: finalStartTime,
       durationMinutes: experience.durationMinutes,
       groupSize: data.groupSize,
       agreedPrice: experience.price * data.groupSize,

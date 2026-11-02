@@ -90,6 +90,7 @@ model GuideProfile {
   experiences        Experience[]
   bookings           Booking[]
   reviews            Review[]
+  availabilities     Availability[]
 
   @@index([city])
   @@index([verificationStatus])
@@ -273,4 +274,18 @@ model Message {
   createdAt      DateTime     @default(now())
 
   @@index([conversationId])
+}
+
+model Availability {
+  id             Int          @id @default(autoincrement())
+  guideProfileId Int
+  guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+
+  date           DateTime
+  startTime      String
+  endTime        String
+
+  createdAt      DateTime     @default(now())
+
+  @@index([guideProfileId])
 }

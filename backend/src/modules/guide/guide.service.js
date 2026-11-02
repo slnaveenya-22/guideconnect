@@ -88,11 +88,8 @@ async function listGuides(query) {
     verificationStatus: 'APPROVED',
   };
 
-  if (query.city) {
-    where.OR = [
-      { city: { contains: query.city } },
-      { serviceAreas: { contains: query.city } },
-    ];
+    if (query.city) {
+    where.city = { contains: query.city };
   }
 
   if (query.maxPrice) {

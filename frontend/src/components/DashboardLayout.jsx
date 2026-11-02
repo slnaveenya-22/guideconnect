@@ -2,7 +2,7 @@ import { NavLink, useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard, MapPin, Calendar, MessageSquare,
   Star, User, LogOut, Compass, Briefcase,
-  Users, ShieldCheck, BarChart3, Flag,
+  Users, ShieldCheck,
 } from 'lucide-react';
 import { Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';

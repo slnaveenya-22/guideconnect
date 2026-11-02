@@ -31,6 +31,10 @@ app.use('/api/guide', guideRoutes);
 const guideExperienceRoutes = require('./modules/experience/guide-experience.routes');
 app.use('/api/guide/experiences', guideExperienceRoutes);
 
+// Guide own availability
+const availabilityRoutes = require('./modules/availability/availability.routes');
+app.use('/api/availability', availabilityRoutes);
+
 // Guide own verification
 const verificationRoutes = require('./modules/verification/verification.routes');
 app.use('/api/guide/verification', verificationRoutes);
@@ -68,6 +72,11 @@ app.use('/api/bookings/:id/review', reviewBookingRoutes);
 
 const guideReviewsRoutes = require('./modules/review/guide-reviews.routes');
 app.use('/api/guides/:id/reviews', guideReviewsRoutes);
+
+// Review Dashboard Routes (FIX 4)
+// Note: We mount these at /api to catch /api/users/me/reviews and /api/guide/reviews
+const reviewDashboardRoutes = require('./modules/review/review.routes');
+app.use('/api', reviewDashboardRoutes);
 
 // Admin
 const adminVerificationRoutes = require('./modules/verification/admin.routes');

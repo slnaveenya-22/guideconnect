@@ -4,19 +4,40 @@ function validateCreate(body) {
   if (!body.experienceId || isNaN(parseInt(body.experienceId))) {
     errors.push('experienceId is required');
   }
-  if (!body.scheduledDate || isNaN(Date.parse(body.scheduledDate))) {
-    errors.push('A valid scheduledDate (ISO format) is required');
+  
+  // Accept both 'scheduledDate' and 'date'
+  const dateToParse = body.scheduledDate || body.date;
+  
+  let parsedDate = null;
+  if (dateToParse) {
+    if (dateToParse.includes('-')) {
+      const parts = dateToParse.split('-');
+      // Handle DD-MM-YYYY just in case
+      if (parts[0].length === 2) {
+        parsedDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      } else {
+        // Handle YYYY-MM-DD (what she is sending)
+        parsedDate = new Date(dateToParse);
+      }
+    }
+  }
+
+  if (!parsedDate || isNaN(parsedDate.getTime())) {
+    errors.push('A valid scheduledDate is required');
   } else {
-    const d = new Date(body.scheduledDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (d < today) {
+    if (parsedDate < today) {
       errors.push('scheduledDate cannot be in the past');
     }
   }
-  if (!body.startTime || !/^\d{2}:\d{2}$/.test(body.startTime)) {
+  
+  // Default startTime to 09:00 if the frontend forgot to send it
+  const timeToCheck = body.startTime || '09:00';
+  if (!/^\d{2}:\d{2}$/.test(timeToCheck)) {
     errors.push('startTime must be in HH:MM format');
   }
+  
   if (typeof body.groupSize !== 'number' || body.groupSize < 1) {
     errors.push('groupSize must be a positive number');
   }
