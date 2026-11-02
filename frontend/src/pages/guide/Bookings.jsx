@@ -112,7 +112,9 @@ export default function GuideBookings() {
                     </div>
                   </div>
                   <div>
-                     <button className="btn btn-sm btn-primary" disabled>Message Tourist (Module 6)</button>
+                    <Link to={`/guide/messages/${b.id}`} className="btn btn-sm btn-primary">
+                     Message Tourist
+                    </Link>
                   </div>
                 </div>
               </div>

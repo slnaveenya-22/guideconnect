@@ -80,7 +80,9 @@ export default function TouristBookings() {
                     </button>
                   )}
                   {b.status === 'ACCEPTED' && (
-                     <button className="btn btn-sm btn-primary" disabled>Message Guide (Module 6)</button>
+                    <Link to={`/tourist/messages/${b.id}`} className="btn btn-sm btn-primary">
+                      Message Guide
+                    </Link>
                   )}
                 </div>
                 

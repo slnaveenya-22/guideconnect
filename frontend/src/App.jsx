@@ -9,6 +9,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Guides from './pages/Guides';
 import NotFound from './pages/NotFound';
+import ChatWindow from './pages/ChatWindow';
+import Messages from './pages/Messages';
 
 import TouristDashboard from './pages/tourist/Dashboard';
 import GuideDashboard from './pages/guide/Dashboard';
@@ -135,6 +137,26 @@ function Layout() {
           <Route
             path="/guide/bookings"
             element={<ProtectedRoute roles={['GUIDE']}><GuideBookings /></ProtectedRoute>}
+          />
+
+          <Route 
+            path="/tourist/messages/:bookingId" 
+            element={<ProtectedRoute roles={['TOURIST']}><ChatWindow /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/guide/messages/:bookingId" 
+            element={<ProtectedRoute roles={['GUIDE']}><ChatWindow /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/tourist/messages" 
+            element={<ProtectedRoute roles={['TOURIST']}><Messages /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/guide/messages" 
+            element={<ProtectedRoute roles={['GUIDE']}><Messages /></ProtectedRoute>} 
           />
 
           {/* ───── 404 ───── */}
