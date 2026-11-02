@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, Star, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+import ReviewModal from '../../components/ReviewModal';
 import { getMyBookings, cancelBooking } from '../../api/bookings';
 
 export default function TouristBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewBooking, setReviewBooking] = useState(null);
 
   function load() {
     setLoading(true);
@@ -89,12 +91,29 @@ export default function TouristBookings() {
                       </Link>
                     </div>
                   )}
+                  {b.status === 'ACCEPTED' && (
+                    <button 
+                      onClick={() => setReviewBooking(b)} 
+                      className="btn btn-sm btn-outline-navy"
+                    >
+                      <Star size={14} className="me-1" /> Leave Review
+                    </button>
+                  )}
                 </div>
                 
               </div>
             </div>
           ))}
         </div>
+      )}
+      {reviewBooking && (
+        <ReviewModal
+          booking={reviewBooking}
+          onClose={() => setReviewBooking(null)}
+          onSuccess={() => {
+            load(); // Reloads the bookings list (assuming you have a load() function)
+          }}
+        />
       )}
     </DashboardLayout>
   );

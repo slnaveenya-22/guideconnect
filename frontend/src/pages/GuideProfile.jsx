@@ -7,6 +7,7 @@ import {
 import { getGuideById } from '../api/guides';
 import { useAuth } from '../context/AuthContext';
 import ExperienceCard from '../components/ExperienceCard';
+import { getGuideReviews } from '../api/reviews';
 
 const TABS = ['About', 'Experiences', 'Reviews', 'Availability'];
 
@@ -45,6 +46,70 @@ function ExperiencesTab({ guideId }) {
           <ExperienceCard exp={exp} />
         </div>
       ))}
+    </div>
+  );
+}
+
+function ReviewsTab({ guideId }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getGuideReviews(guideId)
+      .then(setData)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [guideId]);
+
+  if (loading) return <div className="card p-5 text-center text-muted-2">Loading reviews…</div>;
+
+  const reviews = data?.reviews || [];
+
+  if (reviews.length === 0) {
+    return (
+      <div className="card p-5 text-center text-muted-2">
+        <Star size={32} style={{ margin: '0 auto 0.75rem', opacity: 0.4 }} />
+        <p className="mb-0">No reviews yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card p-4">
+      <div className="d-flex align-items-center gap-4 mb-4 pb-4 border-bottom">
+        <div className="text-center">
+          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--gc-navy)', lineHeight: 1 }}>
+            {data.avgRating.toFixed(1)}
+          </div>
+          <div className="text-warning my-1">
+            {[1,2,3,4,5].map(star => (
+              <Star key={star} size={16} fill={data.avgRating >= star ? '#f59e0b' : '#e2e8f0'} style={{ color: data.avgRating >= star ? '#f59e0b' : '#e2e8f0' }} />
+            ))}
+          </div>
+          <div className="text-muted-2" style={{ fontSize: '0.85rem' }}>{data.reviewCount} reviews</div>
+        </div>
+      </div>
+
+      <div className="d-flex flex-column gap-4">
+        {reviews.map((rev) => (
+          <div key={rev.id}>
+            <div className="d-flex align-items-center justify-content-between mb-1">
+              <div style={{ fontWeight: 700, color: 'var(--gc-navy)' }}>{rev.tourist?.name || 'Anonymous'}</div>
+              <div className="text-muted-2" style={{ fontSize: '0.8rem' }}>
+                {new Date(rev.createdAt).toLocaleDateString()}
+              </div>
+            </div>
+            <div className="text-warning mb-2">
+              {[1,2,3,4,5].map(star => (
+                <Star key={star} size={12} fill={rev.rating >= star ? '#f59e0b' : 'transparent'} style={{ color: rev.rating >= star ? '#f59e0b' : '#cbd5e1' }} />
+              ))}
+            </div>
+            {rev.comment && (
+              <p className="text-muted-2 mb-0" style={{ fontSize: '0.9rem' }}>"{rev.comment}"</p>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -223,10 +288,7 @@ export default function GuideProfile() {
           )}
 
           {tab === 'Reviews' && (
-            <div className="card p-5 text-center text-muted-2">
-              <Star size={32} style={{ margin: '0 auto 0.75rem', opacity: 0.4 }} />
-              <p className="mb-0">Reviews will be available in Module 8.</p>
-            </div>
+            <ReviewsTab guideId={guide.id} />
           )}
 
           {tab === 'Availability' && (
