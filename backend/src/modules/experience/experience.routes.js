@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 const {
   create,
@@ -16,8 +18,8 @@ router.get('/', list);
 router.get('/:id', getOne);
 
 // Guide-only
-router.post('/', authenticate, requireRole('GUIDE'), create);
-router.patch('/:id', authenticate, requireRole('GUIDE'), update);
+router.post('/', authenticate, requireRole('GUIDE'), upload.array('images', 5), create);
+router.patch('/:id', authenticate, requireRole('GUIDE'), upload.array('images', 5), update);
 router.delete('/:id', authenticate, requireRole('GUIDE'), archive);
 
 module.exports = router;

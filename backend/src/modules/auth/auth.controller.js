@@ -1,4 +1,4 @@
-const { registerUser, loginUser, googleLogin } = require('./auth.service');
+const { registerUser, loginUser, googleLogin, forgotPassword, resetPassword } = require('./auth.service');
 const {
   validateRegister,
   validateLogin,
@@ -72,4 +72,26 @@ async function me(req, res) {
   });
 }
 
-module.exports = { register, login, google, me };
+async function forgotPasswordCtrl(req, res, next) {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+    await forgotPassword(email);
+    res.json({ success: true, message: 'OTP sent' });
+  } catch (err) { next(err); }
+}
+
+async function resetPasswordCtrl(req, res, next) {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) return res.status(400).json({ success: false, message: 'Missing fields' });
+    
+    // Validate new password
+    if (newPassword.length < 6) return res.status(400).json({ success: false, message: 'Password too short' });
+    
+    await resetPassword(email, otp, newPassword);
+    res.json({ success: true, message: 'Password reset successful' });
+  } catch (err) { next(err); }
+}
+
+module.exports = { register, login, google, me, forgotPasswordCtrl, resetPasswordCtrl };

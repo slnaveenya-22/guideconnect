@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -13,6 +14,8 @@ app.use(
   })
 );
 app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health
 app.get('/api/health', (req, res) => {
@@ -69,6 +72,9 @@ app.use('/api/conversations/:id/messages', conversationRoutes);
 // Reviews
 const reviewBookingRoutes = require('./modules/review/review.routes');
 app.use('/api/bookings/:id/review', reviewBookingRoutes);
+
+const availabilityPublicRoutes = require('./modules/availability/availability.public.routes');
+app.use('/api/experiences', availabilityPublicRoutes);
 
 const guideReviewsRoutes = require('./modules/review/guide-reviews.routes');
 app.use('/api/guides/:id/reviews', guideReviewsRoutes);

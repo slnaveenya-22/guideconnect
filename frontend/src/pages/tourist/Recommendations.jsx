@@ -7,6 +7,17 @@ import { getRecommendations } from '../../api/recommendations';
 const INTERESTS = ['Food', 'History', 'Culture', 'Nature', 'Photography', 'Shopping'];
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Malayalam', 'Kannada'];
 
+// List of cities for the live autocomplete
+const TAMIL_NADU_CITIES = [
+  'Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 
+  'Tirunelveli', 'Tiruppur', 'Vellore', 'Erode', 'Thoothukkudi', 
+  'Dindigul', 'Thanjavur', 'Ranipet', 'Sivakasi', 'Karur', 
+  'Udhagamandalam (Ooty)', 'Hosur', 'Nagercoil', 'Kanchipuram', 
+  'Kumarapalayam', 'Karaikkudi', 'Neyveli', 'Cuddalore', 'Kumbakonam', 
+  'Tiruvannamalai', 'Pollachi', 'Rajapalayam', 'Gudiyatham', 'Pudukkottai', 
+  'Vaniyambadi', 'Ambur', 'Nagapattinam', 'Kanyakumari', 'Kodaikanal'
+];
+
 export default function Recommendations() {
   const [form, setForm] = useState({
     city: '',
@@ -20,6 +31,21 @@ export default function Recommendations() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
+  // Autocomplete states
+  const [citySearch, setCitySearch] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+
+  // Filter cities based on what the user is typing
+  const filteredCities = TAMIL_NADU_CITIES.filter(c => 
+    c.toLowerCase().includes(citySearch.toLowerCase())
+  );
+
+  function handleCitySelect(cityName) {
+    setForm({ ...form, city: cityName });
+    setCitySearch(cityName);
+    setShowCityDropdown(false);
+  }
+
   function toggleInterest(interest) {
     setForm((f) => {
       const exists = f.interests.includes(interest);
@@ -32,8 +58,10 @@ export default function Recommendations() {
 
   async function handleSearch(e) {
     e.preventDefault();
-    if (!form.city) {
-      setError('Please enter a destination city.');
+    
+    // Ensure the user actually selected a valid city from the list
+    if (!form.city || !TAMIL_NADU_CITIES.includes(form.city)) {
+      setError('Please select a valid city from the dropdown.');
       return;
     }
 
@@ -79,7 +107,9 @@ export default function Recommendations() {
             {error && <div className="alert alert-danger py-2" style={{ fontSize: '0.85rem' }}>{error}</div>}
 
             <form onSubmit={handleSearch}>
-              <div className="mb-3">
+              
+              {/* AUTOCOMPLETE DESTINATION FIELD */}
+              <div className="mb-3 position-relative">
                 <label className="form-label">Destination *</label>
                 <div style={{ position: 'relative' }}>
                   <MapPin size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
@@ -88,11 +118,43 @@ export default function Recommendations() {
                     className="form-control"
                     placeholder="e.g. Coimbatore"
                     style={{ paddingLeft: 38 }}
-                    value={form.city}
-                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                    value={citySearch}
+                    onChange={(e) => {
+                      setCitySearch(e.target.value);
+                      setShowCityDropdown(true);
+                      // If they type, we clear the exact match until they select from dropdown
+                      if (form.city && e.target.value !== form.city) {
+                         setForm({ ...form, city: '' });
+                      }
+                    }}
+                    onFocus={() => setShowCityDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowCityDropdown(false), 200)} // Delay to allow click
                     required
                   />
                 </div>
+
+                {/* Dropdown showing matching cities */}
+                {showCityDropdown && citySearch && (
+                  <div 
+                    className="position-absolute w-100 bg-white shadow-lg rounded mt-1 overflow-hidden" 
+                    style={{ zIndex: 1000, maxHeight: 200, overflowY: 'auto' }}
+                  >
+                    {filteredCities.length > 0 ? (
+                      filteredCities.map(city => (
+                        <div 
+                          key={city} 
+                          className="px-3 py-2 border-bottom" 
+                          style={{ cursor: 'pointer', fontSize: '0.9rem' }}
+                          onMouseDown={() => handleCitySelect(city)} // use onMouseDown so it fires before onBlur
+                        >
+                          {city}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-muted" style={{ fontSize: '0.85rem' }}>No matching cities found</div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="mb-3">
@@ -201,15 +263,12 @@ export default function Recommendations() {
               <div className="d-flex flex-column gap-3">
                 {results.map((guide, index) => (
                   <div key={guide.id} className="card p-3 card-hover d-flex flex-row gap-4 align-items-center">
-                    {/* Rank number */}
                     <div style={{ width: 30, textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, color: index === 0 ? 'var(--gc-primary)' : '#cbd5e1' }}>
                       #{index + 1}
                     </div>
 
-                    {/* Avatar (placeholder) */}
                     <div style={{ width: 64, height: 64, borderRadius: '50%', background: `hsl(${guide.id * 60 % 360}, 60%, 60%)`, flexShrink: 0 }} />
 
-                    {/* Info */}
                     <div style={{ flex: 1 }}>
                       <div className="d-flex justify-content-between align-items-start">
                         <div>
@@ -229,7 +288,6 @@ export default function Recommendations() {
                           </div>
                         </div>
 
-                        {/* Score badge */}
                         <div className="text-end">
                           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gc-primary)', lineHeight: 1 }}>
                             {Math.round(guide.matchScore)}%
@@ -238,7 +296,6 @@ export default function Recommendations() {
                         </div>
                       </div>
 
-                      {/* Why they matched */}
                       <div className="d-flex flex-wrap gap-2 mt-2">
                         {guide.reasons?.map((reason, i) => (
                           <span key={i} className="gc-badge gc-badge-green d-flex align-items-center gap-1" style={{ fontSize: '0.7rem' }}>
@@ -248,7 +305,6 @@ export default function Recommendations() {
                       </div>
                     </div>
 
-                    {/* Action */}
                     <div style={{ flexShrink: 0 }}>
                       <Link to={`/guides/${guide.id}`} className="btn btn-outline-navy btn-sm">
                         View <ArrowRight size={14} />

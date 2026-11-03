@@ -125,12 +125,11 @@ async function listGuides(query) {
   // Filter in JS to fix the case-sensitivity issue
   let filtered = allGuides;
   
-    if (query.city) {
-    const searchCity = query.city.toLowerCase();
-    filtered = filtered.filter((g) => {
-      // Only check the main city they live in
-      return g.city.toLowerCase().includes(searchCity);
-    });
+  if (query.city) {
+    where.OR = [
+      { city: { contains: query.city } },       
+      { serviceAreas: { contains: query.city } },
+    ];
   }
 
   if (query.language) {

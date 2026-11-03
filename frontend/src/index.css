@@ -467,19 +467,12 @@ a { text-decoration: none; color: inherit; }
 
 /* ───── Dashboard layout ───── */
 .gc-dash {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: calc(100vh - 60px);
-  background: var(--gc-bg);
+  display: flex;
+  width: 100%;
 }
 .gc-sidebar {
   background: #fff;
-  border-right: 1px solid var(--gc-border);
-  padding: 1.25rem 1rem;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
+  padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
 }

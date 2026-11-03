@@ -19,7 +19,17 @@ async function create(req, res, next) {
       });
     }
 
-    const exp = await createExperience(req.user.id, req.body);
+    // Prepare clean data for the database
+    const cleanData = {
+      ...req.body,
+      price: Number(req.body.price),
+      durationMinutes: Number(req.body.durationMinutes),
+      maxGroupSize: Number(req.body.maxGroupSize),
+      languages: Array.isArray(req.body.languages) ? req.body.languages : [req.body.languages],
+      images: req.files ? req.files.map(f => f.path) : [],
+    };
+
+    const exp = await createExperience(req.user.id, cleanData);
     res.status(201).json({
       success: true,
       message: 'Experience created',
@@ -63,7 +73,16 @@ async function update(req, res, next) {
       });
     }
 
-    const exp = await updateExperience(req.user.id, req.params.id, req.body);
+    const cleanData = {
+      ...req.body,
+      ...(req.body.price !== undefined && { price: Number(req.body.price) }),
+      ...(req.body.durationMinutes !== undefined && { durationMinutes: Number(req.body.durationMinutes) }),
+      ...(req.body.maxGroupSize !== undefined && { maxGroupSize: Number(req.body.maxGroupSize) }),
+      ...(req.body.languages !== undefined && { languages: Array.isArray(req.body.languages) ? req.body.languages : [req.body.languages] }),
+      ...(req.files && req.files.length > 0 && { newImages: req.files.map(f => f.path) }),
+    };
+
+    const exp = await updateExperience(req.user.id, req.params.id, cleanData);
     res.json({ success: true, data: exp });
   } catch (err) {
     next(err);

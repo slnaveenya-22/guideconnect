@@ -55,6 +55,8 @@ model User {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  resetOtp           String?
+  resetOtpExpiresAt  DateTime?
 
   guideProfile         GuideProfile?
   reviewsGiven         GuideVerification[] @relation("AdminReviews")
@@ -90,7 +92,6 @@ model GuideProfile {
   experiences        Experience[]
   bookings           Booking[]
   reviews            Review[]
-  availabilities     Availability[]
 
   @@index([city])
   @@index([verificationStatus])
@@ -120,6 +121,7 @@ model GuideVerification {
 
 model Experience {
   id                Int                @id @default(autoincrement())
+  availabilities  Availability[] 
   guideProfileId    Int
   guideProfile      GuideProfile       @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
 
@@ -277,15 +279,13 @@ model Message {
 }
 
 model Availability {
-  id             Int          @id @default(autoincrement())
-  guideProfileId Int
-  guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+  id           Int         @id @default(autoincrement())
+  experienceId Int
+  experience   Experience  @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  date         DateTime
+  startTime    String
+  endTime      String
+  createdAt    DateTime    @default(now())
 
-  date           DateTime
-  startTime      String
-  endTime        String
-
-  createdAt      DateTime     @default(now())
-
-  @@index([guideProfileId])
+  @@index([experienceId])
 }

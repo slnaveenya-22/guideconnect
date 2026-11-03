@@ -8,11 +8,12 @@ const CATEGORIES = ['FOOD', 'HERITAGE', 'SHOPPING', 'CULTURE', 'SIGHTSEEING', 'N
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Malayalam', 'Kannada', 'French', 'German'];
 
 export default function Guides() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams(); 
 
   const [city, setCity] = useState(searchParams.get('city') || '');
   const [language, setLanguage] = useState(searchParams.get('language') || '');
   const [category, setCategory] = useState(searchParams.get('category') || '');
+  const [date, setDate] = useState(searchParams.get('date') || '');
   const [verifiedOnly, setVerifiedOnly] = useState(searchParams.get('verifiedOnly') === 'true');
   const [sort, setSort] = useState(searchParams.get('sort') || 'rating');
   const [page, setPage] = useState(Number(searchParams.get('page') || 1));

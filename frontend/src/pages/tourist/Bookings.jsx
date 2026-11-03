@@ -66,14 +66,14 @@ export default function TouristBookings() {
                     </div>
                     <div className="text-muted-2 d-flex flex-wrap gap-3" style={{ fontSize: '0.85rem' }}>
                       <span><MapPin size={13} className="me-1"/>{b.experience?.city}</span>
-                      <span><Calendar size={13} className="me-1"/>{new Date(b.date).toLocaleDateString()}</span>
-                      <span>Guide: {b.guide?.name}</span>
+                      <span><Calendar size={13} className="me-1"/>{new Date(b.scheduledDate || b.date).toLocaleDateString()}</span>
+                      <span>Guide: {b.guideProfile?.user?.name || 'Unknown'}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="d-flex gap-2">
-                  <Link to={`/experiences/${b.experienceId}`} className="btn btn-sm btn-outline-navy">
+                  <Link to={`/experiences/${b.experience.id}`} className="btn btn-sm btn-outline-navy">
                     View Tour
                   </Link>
                   {b.status === 'PENDING' && (

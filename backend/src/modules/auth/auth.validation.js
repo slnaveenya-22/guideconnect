@@ -3,12 +3,22 @@ function validateRegister(body) {
   if (!body.name || body.name.trim().length < 2) {
     errors.push('Name must be at least 2 characters');
   }
-  if (!body.email || !/^\S+@\S+\.\S+$/.test(body.email)) {
-    errors.push('Valid email is required');
+  
+  // Standard Email Regex
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!body.email || !emailRegex.test(body.email)) {
+    errors.push('Valid standard email is required');
   }
+
+  // Password Rules: 6 chars + 1 special
   if (!body.password || body.password.length < 6) {
     errors.push('Password must be at least 6 characters');
   }
+  const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+  if (body.password && !specialCharRegex.test(body.password)) {
+    errors.push('Password must contain at least 1 special character');
+  }
+
   if (!body.role || !['TOURIST', 'GUIDE'].includes(body.role)) {
     errors.push('Role must be either TOURIST or GUIDE');
   }

@@ -45,7 +45,6 @@ async function createBooking(touristId, data) {
     throw err;
   }
 
-  // Tourist cannot book their own guide profile
   if (experience.guideProfile.userId === touristId) {
     const err = new Error('You cannot book your own experience');
     err.status = 400;
@@ -53,7 +52,6 @@ async function createBooking(touristId, data) {
     throw err;
   }
 
-  // Group size within limit
   if (data.groupSize > experience.maxGroupSize) {
     const err = new Error(`Group size cannot exceed ${experience.maxGroupSize}`);
     err.status = 400;
@@ -61,17 +59,78 @@ async function createBooking(touristId, data) {
     throw err;
   }
 
-  // Handle both 'scheduledDate' and 'date' sent by frontend
+  // Handle date formatting
   const finalDate = data.scheduledDate || data.date;
-  const finalStartTime = data.startTime || '09:00';
+  const bookingDate = new Date(finalDate);
+  bookingDate.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
 
+  const nextDay = new Date(bookingDate);
+  nextDay.setDate(nextDay.getDate() + 1);
+
+  // 1. Find the availability slot for that specific day
+  const availableSlot = await prisma.availability.findFirst({
+    where: {
+      experienceId: experience.id, // Changed from guideProfileId
+      date: { gte: bookingDate, lt: nextDay },
+    },
+  });
+
+  if (!availableSlot) {
+    const err = new Error('The guide is not available on this experience');
+    err.status = 400;
+    err.code = 'SLOT_UNAVAILABLE';
+    throw err;
+  }
+
+  // 2. Validate the requested time fits inside the guide's window
+  const reqStart = timeToMinutes(data.startTime);
+  const reqEnd = reqStart + experience.durationMinutes;
+  const availStart = timeToMinutes(availableSlot.startTime);
+  const availEnd = timeToMinutes(availableSlot.endTime);
+
+  if (reqStart < availStart || reqEnd > availEnd) {
+    const err = new Error(`The tour (${experience.durationMinutes} mins) does not fit within the guide's availability (${availableSlot.startTime} - ${availableSlot.endTime}).`);
+    err.status = 400;
+    err.code = 'SLOT_UNAVAILABLE';
+    throw err;
+  }
+
+  // 3. Check for overlapping ACCEPTED bookings
+  const existingBookings = await prisma.booking.findMany({
+    where: {
+      guideProfileId: experience.guideProfileId,
+      status: 'ACCEPTED',
+      scheduledDate: {
+        gte: bookingDate,
+        lt: nextDay,
+      },
+    },
+  });
+
+  const hasOverlap = existingBookings.some((b) =>
+    intervalsOverlap(
+      b.startTime,
+      b.durationMinutes,
+      data.startTime,
+      experience.durationMinutes
+    )
+  );
+
+  if (hasOverlap) {
+    const err = new Error('This time slot is already booked');
+    err.status = 409;
+    err.code = 'SLOT_UNAVAILABLE';
+    throw err;
+  }
+
+  // 4. Create the booking
   const booking = await prisma.booking.create({
     data: {
       touristId,
       guideProfileId: experience.guideProfileId,
       experienceId: experience.id,
-      scheduledDate: new Date(finalDate),
-      startTime: finalStartTime,
+      scheduledDate: bookingDate,
+      startTime: data.startTime,
       durationMinutes: experience.durationMinutes,
       groupSize: data.groupSize,
       agreedPrice: experience.price * data.groupSize,

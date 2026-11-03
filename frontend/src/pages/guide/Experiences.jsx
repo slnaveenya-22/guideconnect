@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, EyeOff, Briefcase } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Briefcase, Calendar } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import CategoryBadge from '../../components/CategoryBadge';
 import { getMyExperiences, deleteExperience, updateExperience } from '../../api/experiences';
 
-const PLACEHOLDER = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=300&q=60';
+const getImageUrl = (url) => {
+  if (!url) return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=300&q=60';
+  if (url.startsWith('http')) return url;
+  return `http://localhost:5000/${url.replace(/\\/g, '/')}`;
+};
 
 export default function GuideExperiences() {
   const navigate = useNavigate();
@@ -91,7 +95,7 @@ export default function GuideExperiences() {
                     <td>
                       <div className="d-flex align-items-center gap-3">
                         <img
-                          src={exp.images?.[0] || PLACEHOLDER}
+                          src={getImageUrl(exp.images?.[0])} // 👈 Use the helper here
                           alt=""
                           style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }}
                         />
@@ -117,6 +121,15 @@ export default function GuideExperiences() {
                       )}
                     </td>
                     <td style={{ textAlign: 'right' }}>
+                      {/* NEW: Schedule Button */}
+                      <button
+                        className="btn btn-sm btn-ghost me-1 text-primary"
+                        title="Manage Availability"
+                        onClick={() => navigate(`/guide/availability/${exp.id}`)}
+                      >
+                        <Calendar size={15} />
+                      </button>
+
                       <button
                         className="btn btn-sm btn-ghost me-1"
                         title={exp.isActive ? 'Deactivate' : 'Activate'}

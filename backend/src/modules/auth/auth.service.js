@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const prisma = require('../../config/prisma');
+const { sendOtpEmail } = require('./auth.email');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -134,4 +135,57 @@ async function googleLogin({ idToken, role }) {
   return { token, user: safeUser(user) };
 }
 
-module.exports = { registerUser, loginUser, googleLogin };
+async function forgotPassword(email) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    const err = new Error('Email not found');
+    err.status = 404;
+    throw err;
+  }
+
+  // Generate 6 digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+  // Save to DB
+  await prisma.user.update({
+    where: { email },
+    data: { resetOtp: otp, resetOtpExpiresAt: expires },
+  });
+
+  // Send Email
+  await sendOtpEmail(email, otp);
+  return true;
+}
+
+async function resetPassword(email, otp, newPassword) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  
+  if (!user || user.resetOtp !== otp) {
+    const err = new Error('Invalid or expired OTP');
+    err.status = 400;
+    throw err;
+  }
+
+  if (user.resetOtpExpiresAt < new Date()) {
+    const err = new Error('OTP has expired');
+    err.status = 400;
+    throw err;
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  
+  await prisma.user.update({
+    where: { email },
+    data: { 
+      passwordHash, 
+      resetOtp: null, 
+      resetOtpExpiresAt: null,
+      authProvider: 'LOCAL' // Force to local so they can log in with password now
+    },
+  });
+
+  return true;
+}
+
+module.exports = { registerUser, loginUser, googleLogin, forgotPassword, resetPassword };

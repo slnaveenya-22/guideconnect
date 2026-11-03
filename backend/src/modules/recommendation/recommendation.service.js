@@ -19,7 +19,7 @@ function scoreBudget(hourlyRate, maxPrice) {
   // Linear falloff: at 2x maxPrice → 0
   const ratio = hourlyRate / maxPrice;
   if (ratio >= 2) return 0;
-  return 2 - ratio; // 1 at <=maxPrice, 0 at 2x maxPrice
+  return 2 - ratio; 
 }
 
 function scoreLanguage(guideLanguages, requestedLanguage) {
@@ -41,7 +41,7 @@ function scoreExperience(yearsOfExperience) {
 // ---------- Main function ----------
 
 async function recommendGuides(query) {
-  const city = query.city.trim();
+  const city = query.city.trim().toLowerCase();
 
   // Stage 1: Hard filters
   const candidates = await prisma.guideProfile.findMany({
@@ -56,11 +56,14 @@ async function recommendGuides(query) {
     },
   });
 
-  // Filter: serve the city
+  // Filter: serve the city (Case-insensitive & Partial match)
   let filtered = candidates.filter((g) => {
     const areas = Array.isArray(g.serviceAreas) ? g.serviceAreas : [];
-    const cityMatch = g.city.toLowerCase() === city.toLowerCase();
-    const areaMatch = areas.some((a) => a.toLowerCase() === city.toLowerCase());
+    
+    // 👇 FIXED LOGIC HERE 👇
+    const cityMatch = g.city.toLowerCase().includes(city);
+    const areaMatch = areas.some((a) => a.toLowerCase().includes(city));
+    
     return cityMatch || areaMatch;
   });
 
@@ -69,12 +72,6 @@ async function recommendGuides(query) {
     filtered = filtered.filter((g) =>
       g.experiences.some((e) => e.category === query.category)
     );
-  }
-
-  // Filter: has availability on date (if date provided)
-  if (query.date) {
-    // Availability module not implemented yet — skip for now.
-    // When Availability is added, filter guides whose schedule includes this date.
   }
 
   // Stage 2: Weighted scoring
@@ -140,7 +137,8 @@ async function recommendGuides(query) {
     }
 
     return {
-      guideId: g.id,
+      guideId: g.id, // Note: The frontend expects 'id', so we will pass both
+      id: g.id,      // 👈 Added this so frontend mapping works
       name: g.user.name,
       avatarUrl: g.avatarUrl,
       city: g.city,

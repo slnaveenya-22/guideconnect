@@ -2,13 +2,15 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../../config/prisma'); // Added import
 
-const { register, login, google, me } = require('./auth.controller');
+const { register, login, google, me, forgotPasswordCtrl, resetPasswordCtrl } = require('./auth.controller');
 const { authenticate } = require('../../middleware/auth.middleware');
 
 router.post('/register', register);
 router.post('/login', login);
 router.post('/google', google);
 router.get('/me', authenticate, me);
+router.post('/forgot-password', forgotPasswordCtrl);
+router.post('/reset-password', resetPasswordCtrl);
 
 // Update Logged-in User Profile: PATCH /api/auth/me
 router.patch('/me', authenticate, async (req, res, next) => {
