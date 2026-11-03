@@ -10,13 +10,10 @@ export default function TouristReviews() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // If backend has GET /users/me/reviews, use that. 
-    // Otherwise, fetch bookings and filter for ones with a review.
     api.get('/users/me/reviews')
-      .then((res) => setReviews(res.data.data))
+      .then((res) => setReviews(res.data.data || []))
       .catch((err) => {
-         // If endpoint fails (404), just set empty array for now
-         console.error(err);
+         console.error("Failed to load reviews", err);
          setReviews([]);
       })
       .finally(() => setLoading(false));

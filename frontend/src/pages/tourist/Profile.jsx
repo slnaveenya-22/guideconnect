@@ -22,8 +22,7 @@ export default function TouristProfile() {
     setSuccess('');
 
     try {
-      // Assuming backend has PATCH /users/me or similar. 
-      // If not, you can comment this out and just make the form read-only.
+      // This calls the PATCH /auth/me route Naveenya built
       await api.patch('/auth/me', { name: form.name });
       setSuccess('Profile updated successfully!');
       
@@ -31,6 +30,8 @@ export default function TouristProfile() {
       const updatedUser = { ...user, name: form.name };
       localStorage.setItem('gc_user', JSON.stringify(updatedUser));
       
+      // Force a page reload so the Navbar and sidebar pick up the new name
+      setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
     } finally {

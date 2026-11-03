@@ -8,10 +8,12 @@ export default function GuideReviews() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This will gracefully fail (and show 0) until Naveenya builds the backend
     api.get('/guide/reviews')
       .then((res) => setReviews(res.data.data || []))
-      .catch(() => setReviews([])) 
+      .catch((err) => {
+         console.error("Failed to load reviews", err);
+         setReviews([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

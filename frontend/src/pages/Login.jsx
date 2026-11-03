@@ -1,32 +1,29 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Compass, Mail, Lock } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Compass, Mail, Lock, ArrowLeft, KeyRound } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 export default function Login() {
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  
+  // Modes: 'login' | 'forgot-email' | 'forgot-otp'
+  const [mode, setMode] = useState('login');
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-async function handleGoogleSuccess(credentialResponse) {
-  setError('');
-  try {
-    const user = await loginWithGoogle(credentialResponse.credential);
-    if (user.role === 'TOURIST') navigate('/tourist/dashboard');
-    else if (user.role === 'GUIDE') navigate('/guide/dashboard');
-    else navigate('/admin/dashboard');
-  } catch (err) {
-    setError(err.response?.data?.message || 'Google sign-in failed');
-  }
-}
-
-  async function handleSubmit(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    setError('');
+    setError(''); setMessage('');
     setLoading(true);
     try {
       const user = await login(email, password);
@@ -34,7 +31,57 @@ async function handleGoogleSuccess(credentialResponse) {
       else if (user.role === 'GUIDE') navigate('/guide/dashboard');
       else navigate('/admin/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      const errorCode = err.response?.data?.code;
+      const errorMsg = err.response?.data?.message;
+      
+      if (errorCode === 'USE_GOOGLE_SIGNIN') {
+         setError('Your account was created with Google. Please click "Continue with Google" below.');
+      } else {
+         setError(errorMsg || 'Login failed');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleSuccess(credentialResponse) {
+    setError('');
+    try {
+      const user = await loginWithGoogle(credentialResponse.credential);
+      if (user.role === 'TOURIST') navigate('/tourist/dashboard');
+      else if (user.role === 'GUIDE') navigate('/guide/dashboard');
+      else navigate('/admin/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google sign-in failed');
+    }
+  }
+
+  // --- FORGOT PASSWORD FLOW ---
+  async function handleSendOtp(e) {
+    e.preventDefault();
+    setError(''); setMessage('');
+    setLoading(true);
+    try {
+      await api.post('/auth/forgot-password', { email });
+      setMessage('OTP sent to your email!');
+      setMode('forgot-otp');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResetPassword(e) {
+    e.preventDefault();
+    setError(''); setMessage('');
+    setLoading(true);
+    try {
+      await api.post('/auth/reset-password', { email, otp, newPassword });
+      setMessage('Password reset successfully! You can now login.');
+      setTimeout(() => setMode('login'), 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to reset password');
     } finally {
       setLoading(false);
     }
@@ -42,106 +89,123 @@ async function handleGoogleSuccess(credentialResponse) {
 
   return (
     <div className="gc-auth-wrap">
-      {/* LEFT VISUAL */}
       <div className="gc-auth-visual">
-        <Link
-          to="/"
-          className="d-flex align-items-center gap-2"
-          style={{ color: '#fff', fontWeight: 800, fontSize: '1.15rem' }}
-        >
+        <Link to="/" className="d-flex align-items-center gap-2" style={{ color: '#fff', fontWeight: 800, fontSize: '1.15rem' }}>
           <span className="gc-logo-mark"><Compass size={18} /></span>
           GuideConnect
         </Link>
-
         <div>
           <h2>Your next adventure starts here.</h2>
           <p>Join our community of travelers and local guides.</p>
         </div>
-
-        <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-          © {new Date().getFullYear()} GuideConnect
-        </div>
+        <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>© {new Date().getFullYear()} GuideConnect</div>
       </div>
 
-      {/* RIGHT FORM */}
       <div className="gc-auth-form-side">
         <div className="gc-auth-form">
-          <div className="gc-tab-pill">
-            <Link to="/login" className="active">Login</Link>
-            <Link to="/register">Register</Link>
-          </div>
-
-          <h3 style={{ fontWeight: 800, color: 'var(--gc-navy)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
-            Welcome back
-          </h3>
-          <p className="text-muted-2 mb-4">Please login to your account.</p>
-
-          {error && <div className="alert alert-danger py-2" style={{ fontSize: '0.9rem' }}>{error}</div>}
-
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label">Email address</label>
-              <div style={{ position: 'relative' }}>
-                <Mail
-                  size={16}
-                  style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }}
-                />
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="you@example.com"
-                  style={{ paddingLeft: 38 }}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+          
+          {mode === 'login' && (
+            <>
+              <div className="gc-tab-pill">
+                <Link to="/login" className="active">Login</Link>
+                <Link to="/register">Register</Link>
               </div>
-            </div>
+              <h3 style={{ fontWeight: 800, color: 'var(--gc-navy)', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>Welcome back</h3>
+              <p className="text-muted-2 mb-4">Please login to your account.</p>
 
-            <div className="mb-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <label className="form-label">Password</label>
-                <a className="text-primary" style={{ fontSize: '0.8rem' }}>Forgot password?</a>
+              {error && <div className="alert alert-danger py-2" style={{ fontSize: '0.9rem' }}>{error}</div>}
+
+              <form onSubmit={handleLogin}>
+                <div className="mb-3">
+                  <label className="form-label">Email address</label>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
+                    <input type="email" className="form-control" placeholder="you@example.com" style={{ paddingLeft: 38 }} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <label className="form-label">Password</label>
+                    <button type="button" className="btn btn-link p-0 text-primary" style={{ fontSize: '0.8rem', textDecoration: 'none' }} onClick={() => { setMode('forgot-email'); setError(''); setMessage(''); }}>
+                      Forgot password?
+                    </button>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
+                    <input type="password" className="form-control" placeholder="••••••••" style={{ paddingLeft: 38 }} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  </div>
+                </div>
+                <button className="btn btn-primary w-100" disabled={loading} style={{ padding: '0.75rem' }}>
+                  {loading ? 'Logging in…' : 'Login'}
+                </button>
+              </form>
+
+              <div className="d-flex align-items-center gap-2 my-3">
+                <hr className="flex-grow-1 m-0" style={{ opacity: 0.15 }} />
+                <span className="text-muted-2" style={{ fontSize: '0.8rem' }}>or continue with</span>
+                <hr className="flex-grow-1 m-0" style={{ opacity: 0.15 }} />
               </div>
-              <div style={{ position: 'relative' }}>
-                <Lock
-                  size={16}
-                  style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }}
-                />
-                <input
-                  type="password"
-                  className="form-control"
-                  placeholder="••••••••"
-                  style={{ paddingLeft: 38 }}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+              <div className="d-flex justify-content-center">
+                <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => setError('Google sign-in failed')} text="continue_with" />
               </div>
-            </div>
+            </>
+          )}
 
-            <button className="btn btn-primary w-100" disabled={loading} style={{ padding: '0.75rem' }}>
-              {loading ? 'Logging in…' : 'Login'}
-            </button>
-          </form>
+          {mode === 'forgot-email' && (
+            <>
+              <button className="btn btn-ghost btn-sm px-0 mb-3" onClick={() => setMode('login')}>
+                <ArrowLeft size={16} className="me-1" /> Back to Login
+              </button>
+              <h3 style={{ fontWeight: 800, color: 'var(--gc-navy)' }}>Reset Password</h3>
+              <p className="text-muted-2 mb-4">Enter your email and we'll send you an OTP.</p>
+              {error && <div className="alert alert-danger py-2" style={{ fontSize: '0.9rem' }}>{error}</div>}
+              <form onSubmit={handleSendOtp}>
+                <div className="mb-3">
+                  <label className="form-label">Email address</label>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
+                    <input type="email" className="form-control" style={{ paddingLeft: 38 }} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+                  {loading ? 'Sending...' : 'Send OTP'}
+                </button>
+              </form>
+            </>
+          )}
 
-          <div className="d-flex align-items-center gap-2 my-3">
-            <hr className="flex-grow-1 m-0" style={{ opacity: 0.15 }} />
-            <span className="text-muted-2" style={{ fontSize: '0.8rem' }}>or continue with</span>
-            <hr className="flex-grow-1 m-0" style={{ opacity: 0.15 }} />
-          </div>
-
-          <div className="d-flex justify-content-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError('Google sign-in failed. Please try again.')}
-              theme="outline"
-              size="large"
-              width="100%"
-              text="continue_with"
-              shape="rectangular"
-            />
-          </div>
+          {mode === 'forgot-otp' && (
+            <>
+              <button className="btn btn-ghost btn-sm px-0 mb-3" onClick={() => setMode('forgot-email')}>
+                <ArrowLeft size={16} className="me-1" /> Back
+              </button>
+              <h3 style={{ fontWeight: 800, color: 'var(--gc-navy)' }}>Enter OTP</h3>
+              <p className="text-muted-2 mb-4">We sent a code to {email}</p>
+              
+              {message && <div className="alert alert-success py-2" style={{ fontSize: '0.9rem' }}>{message}</div>}
+              {error && <div className="alert alert-danger py-2" style={{ fontSize: '0.9rem' }}>{error}</div>}
+              
+              <form onSubmit={handleResetPassword}>
+                <div className="mb-3">
+                  <label className="form-label">6-digit OTP</label>
+                  <div style={{ position: 'relative' }}>
+                    <KeyRound size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
+                    <input type="text" className="form-control" placeholder="123456" style={{ paddingLeft: 38, letterSpacing: 4, fontWeight: 'bold' }} maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value)} required />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label className="form-label">New Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
+                    <input type="password" className="form-control" placeholder="Min 6 chars, 1 special" style={{ paddingLeft: 38 }} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+                  {loading ? 'Resetting...' : 'Reset Password'}
+                </button>
+              </form>
+            </>
+          )}
 
           <p className="text-center text-muted-2 mt-4 mb-0" style={{ fontSize: '0.9rem' }}>
             Don't have an account? <Link to="/register" className="text-primary fw-semibold">Register</Link>
