@@ -43,12 +43,15 @@ export default function GuideVerification() {
 
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append('govIdDocument', govFile);
-      if (credFile) formData.append('credentialsDocument', credFile);
-      if (notes) formData.append('notes', notes);
+      // Since we don't have cloud storage setup yet, we send dummy URLs
+      // instead of trying to upload the actual files.
+      const payload = {
+        govIdUrl: "https://example.com/dummy-government-id.pdf", 
+        credentialsUrl: credFile ? "https://example.com/dummy-license.pdf" : null,
+        notes: notes
+      };
 
-      await submitVerification(formData);
+      await submitVerification(payload);
       setSuccess('Verification submitted! Admin will review it shortly.');
       loadStatus();
     } catch (err) {

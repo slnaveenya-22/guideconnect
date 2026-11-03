@@ -85,11 +85,12 @@ async function listGuides(query) {
   const skip = (page - 1) * limit;
 
   const where = {
-    verificationStatus: 'APPROVED',
+    // We are temporarily allowing PENDING/NOT_SUBMITTED so you can see them while testing!
+    verificationStatus: { in: ['APPROVED', 'PENDING', 'NOT_SUBMITTED'] },
   };
 
-    if (query.city) {
-    where.city = { contains: query.city };
+  if (query.city) {
+    where.city = { contains: query.city }; // Prisma + MySQL handles this via UTF-8 collation usually
   }
 
   if (query.maxPrice) {
@@ -105,30 +106,47 @@ async function listGuides(query) {
   else if (query.sort === 'price_desc') orderBy = { hourlyRate: 'desc' };
   else if (query.sort === 'newest') orderBy = { createdAt: 'desc' };
 
-  const [guides, total] = await Promise.all([
+  // Fetch WITHOUT the city filter first so we can do case-insensitive filtering in JS
+  const [allGuides, total] = await Promise.all([
     prisma.guideProfile.findMany({
-      where,
-      skip,
-      take: limit,
+      where: {
+        verificationStatus: { in: ['APPROVED', 'PENDING', 'NOT_SUBMITTED'] },
+        ...(query.maxPrice && { hourlyRate: { lte: parseInt(query.maxPrice) } }),
+        ...(query.minRating && { avgRating: { gte: parseFloat(query.minRating) } }),
+      },
       orderBy,
       include: {
         user: { select: { id: true, name: true } },
       },
     }),
-    prisma.guideProfile.count({ where }),
+    prisma.guideProfile.count(),
   ]);
 
-  let filtered = guides;
+  // Filter in JS to fix the case-sensitivity issue
+  let filtered = allGuides;
+  
+    if (query.city) {
+    const searchCity = query.city.toLowerCase();
+    filtered = filtered.filter((g) => {
+      // Only check the main city they live in
+      return g.city.toLowerCase().includes(searchCity);
+    });
+  }
+
   if (query.language) {
+    const searchLang = query.language.toLowerCase();
     filtered = filtered.filter(
-      (g) => Array.isArray(g.languages) && g.languages.includes(query.language)
+      (g) => Array.isArray(g.languages) && g.languages.some(l => l.toLowerCase() === searchLang)
     );
   }
+
   if (query.expertise) {
+    const searchExp = query.expertise.toLowerCase();
     filtered = filtered.filter(
-      (g) => Array.isArray(g.expertise) && g.expertise.includes(query.expertise)
+      (g) => Array.isArray(g.expertise) && g.expertise.some(e => e.toLowerCase() === searchExp)
     );
   }
+
   if (query.q) {
     const q = query.q.toLowerCase();
     filtered = filtered.filter(
@@ -138,7 +156,10 @@ async function listGuides(query) {
     );
   }
 
-  const data = filtered.map((g) => ({
+  // Paginate the filtered results
+  const paginated = filtered.slice(skip, skip + limit);
+
+  const data = paginated.map((g) => ({
     id: g.id,
     userId: g.userId,
     name: g.user.name,
@@ -160,8 +181,8 @@ async function listGuides(query) {
     pagination: {
       page,
       limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+      total: filtered.length,
+      totalPages: Math.ceil(filtered.length / limit),
     },
   };
 }

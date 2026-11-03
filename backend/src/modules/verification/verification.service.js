@@ -115,18 +115,21 @@ async function listPending(query) {
     prisma.guideVerification.count({ where: { status } }),
   ]);
 
+  // THE FIX: We now map the data to match exactly what Kavya's frontend expects
   const data = items.map((v) => ({
     id: v.id,
     guideProfileId: v.guideProfileId,
-    guide: {
-      id: v.guideProfile.user.id,
-      name: v.guideProfile.user.name,
-      email: v.guideProfile.user.email,
+    guideProfile: {
       city: v.guideProfile.city,
       languages: v.guideProfile.languages,
       expertise: v.guideProfile.expertise,
+      user: {
+        id: v.guideProfile.user.id,
+        name: v.guideProfile.user.name,
+        email: v.guideProfile.user.email,
+      }
     },
-    govIdUrl: v.govIdUrl,
+    govIdDocumentUrl: v.govIdUrl,       // Map to the name she expects
     credentialsUrl: v.credentialsUrl,
     notes: v.notes,
     status: v.status,

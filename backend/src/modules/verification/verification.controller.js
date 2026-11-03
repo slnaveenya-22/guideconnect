@@ -9,6 +9,7 @@ const { validateSubmit, validateReject } = require('./verification.validation');
 
 async function submit(req, res, next) {
   try {
+    console.log("🚨 INCOMING VERIFICATION DATA:", req.body);
     const errors = validateSubmit(req.body);
     if (errors.length > 0) {
       return res.status(400).json({
