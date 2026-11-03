@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Compass, Mail, Lock, User, CheckCircle2 } from 'lucide-react';
+import { Compass, Mail, Lock, User, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
@@ -10,6 +10,9 @@ export default function Register() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Password visibility state
+  const [showPassword, setShowPassword] = useState(false);
 
   function validateForm() {
     // 1. Email Standard Check
@@ -104,7 +107,23 @@ export default function Register() {
               <label className="form-label">Password</label>
               <div style={{ position: 'relative' }}>
                 <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
-                <input type="password" className="form-control" placeholder="Min 6 chars, 1 special" style={{ paddingLeft: 38 }} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  className="form-control" 
+                  placeholder="Min 6 chars, 1 special" 
+                  style={{ paddingLeft: 38, paddingRight: 40 }} 
+                  value={form.password} 
+                  onChange={(e) => setForm({ ...form, password: e.target.value })} 
+                  required 
+                />
+                <button
+                  type="button"
+                  className="btn border-0 position-absolute top-50 end-0 translate-middle-y pe-3"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ background: 'transparent' }}
+                >
+                  {showPassword ? <EyeOff size={16} className="text-muted" /> : <Eye size={16} className="text-muted" />}
+                </button>
               </div>
             </div>
 
