@@ -36,9 +36,10 @@ export async function updateMyGuideProfile(payload) {
 
 // ---- Verification ----
 
-export async function submitVerification(payload) {
-  // Changed to standard JSON post (removed multipart/form-data headers)
-  const res = await api.post('/guide/verification', payload);
+export async function submitVerification(formData) {
+  const res = await api.post('/guide/verification', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return res.data.data;
 }
 

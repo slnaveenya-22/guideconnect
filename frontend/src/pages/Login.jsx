@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Compass, Mail, Lock, ArrowLeft, KeyRound } from 'lucide-react';
+import { Compass, Mail, Lock, ArrowLeft, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
@@ -20,6 +20,10 @@ export default function Login() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Password visibility states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -132,7 +136,23 @@ export default function Login() {
                   </div>
                   <div style={{ position: 'relative' }}>
                     <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
-                    <input type="password" className="form-control" placeholder="••••••••" style={{ paddingLeft: 38 }} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <input 
+                      type={showPassword ? 'text' : 'password'} 
+                      className="form-control" 
+                      placeholder="••••••••" 
+                      style={{ paddingLeft: 38, paddingRight: 40 }} 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)} 
+                      required 
+                    />
+                    <button
+                      type="button"
+                      className="btn border-0 position-absolute top-50 end-0 translate-middle-y pe-3"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ background: 'transparent' }}
+                    >
+                      {showPassword ? <EyeOff size={16} className="text-muted" /> : <Eye size={16} className="text-muted" />}
+                    </button>
                   </div>
                 </div>
                 <button className="btn btn-primary w-100" disabled={loading} style={{ padding: '0.75rem' }}>
@@ -197,7 +217,23 @@ export default function Login() {
                   <label className="form-label">New Password</label>
                   <div style={{ position: 'relative' }}>
                     <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--gc-muted)' }} />
-                    <input type="password" className="form-control" placeholder="Min 6 chars, 1 special" style={{ paddingLeft: 38 }} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                    <input 
+                      type={showNewPassword ? 'text' : 'password'} 
+                      className="form-control" 
+                      placeholder="Min 6 chars, 1 special" 
+                      style={{ paddingLeft: 38, paddingRight: 40 }} 
+                      value={newPassword} 
+                      onChange={(e) => setNewPassword(e.target.value)} 
+                      required 
+                    />
+                    <button
+                      type="button"
+                      className="btn border-0 position-absolute top-50 end-0 translate-middle-y pe-3"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      style={{ background: 'transparent' }}
+                    >
+                      {showNewPassword ? <EyeOff size={16} className="text-muted" /> : <Eye size={16} className="text-muted" />}
+                    </button>
                   </div>
                 </div>
                 <button type="submit" className="btn btn-primary w-100" disabled={loading}>

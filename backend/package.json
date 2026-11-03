@@ -24,13 +24,18 @@
     "@prisma/client": "^6.1.0",
     "@react-oauth/google": "^0.13.5",
     "bcrypt": "^5.1.1",
+    "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "google-auth-library": "^11.3.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.5.0",
+<<<<<<< HEAD
     "nodemailer": "^10.3.1",
+=======
+    "multer-storage-cloudinary": "^4.0.0",
+>>>>>>> d26e88153f8b4713af291b57ddd94f32106f11e4
     "socket.io": "^4.8.4"
   },
   "devDependencies": {
