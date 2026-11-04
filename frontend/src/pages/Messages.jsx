@@ -70,7 +70,8 @@ export default function Messages() {
           <div className="list-group list-group-flush">
             {conversations.map((booking) => {
               // Determine who the other person is
-              const otherParty = isGuide ? booking.tourist : booking.guide;
+              const otherParty = isGuide ? booking.tourist : booking.guideProfile?.user;
+              <small>{new Date(booking.scheduledDate || booking.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</small>
               const initials = otherParty?.name
                 ?.split(' ')
                 .map((w) => w[0])

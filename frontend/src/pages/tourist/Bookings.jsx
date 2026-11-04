@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Star, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, Star, CheckCircle2, XCircle } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ReviewModal from '../../components/ReviewModal';
 import { getMyBookings, cancelBooking } from '../../api/bookings';
+
+// Helper to fix broken image URLs from local storage
+const getImageUrl = (url) => {
+  if (!url) return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=100&q=60';
+  if (url.startsWith('http')) return url;
+  return `http://localhost:5000/${url.replace(/\\/g, '/')}`;
+};
 
 export default function TouristBookings() {
   const [bookings, setBookings] = useState([]);
@@ -35,6 +42,7 @@ export default function TouristBookings() {
     if (status === 'ACCEPTED') return <span className="gc-badge gc-badge-green"><CheckCircle2 size={12} className="me-1"/> Confirmed</span>;
     if (status === 'REJECTED') return <span className="gc-badge gc-badge-red"><XCircle size={12} className="me-1"/> Declined</span>;
     if (status === 'CANCELLED') return <span className="gc-badge gc-badge-gray">Cancelled</span>;
+    if (status === 'COMPLETED') return <span className="gc-badge gc-badge-blue">Completed</span>;
     return <span className="gc-badge gc-badge-gray">{status}</span>;
   }
 
@@ -58,7 +66,11 @@ export default function TouristBookings() {
               <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 
                 <div className="d-flex gap-3 align-items-center">
-                  <img src={b.experience?.images?.[0] || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=100&q=60'} alt="" style={{ width: 70, height: 70, borderRadius: 12, objectFit: 'cover' }} />
+                  <img 
+                    src={getImageUrl(b.experience?.images?.[0])} 
+                    alt="" 
+                    style={{ width: 70, height: 70, borderRadius: 12, objectFit: 'cover' }} 
+                  />
                   <div>
                     <div className="d-flex align-items-center gap-2 mb-1">
                       <h6 style={{ fontWeight: 700, margin: 0 }}>{b.experience?.title}</h6>
@@ -73,14 +85,13 @@ export default function TouristBookings() {
                 </div>
 
                 <div className="d-flex gap-2">
-                  <Link to={`/tourist/bookings/${b.id}`} className="btn btn-sm btn-outline-navy">
-                    View Details
-                  </Link>
+                  
                   {b.status === 'PENDING' && (
                     <button className="btn btn-sm btn-ghost text-danger" onClick={() => handleCancel(b.id)}>
                       Cancel
                     </button>
                   )}
+
                   {b.status === 'ACCEPTED' && (
                     <div className="d-flex gap-2">
                       <Link to={`/tourist/itinerary/${b.id}`} className="btn btn-sm btn-outline-navy">
@@ -91,7 +102,9 @@ export default function TouristBookings() {
                       </Link>
                     </div>
                   )}
-                  {b.status === 'ACCEPTED' && (
+
+                  {/* 👇 Only show if COMPLETED AND no review exists 👇 */}
+                  {b.status === 'COMPLETED' && !b.review && (
                     <button 
                       onClick={() => setReviewBooking(b)} 
                       className="btn btn-sm btn-outline-navy"
@@ -99,6 +112,14 @@ export default function TouristBookings() {
                       <Star size={14} className="me-1" /> Leave Review
                     </button>
                   )}
+
+                  {/* 👇 Show a static badge if review is already left 👇 */}
+                  {b.status === 'COMPLETED' && b.review && (
+                    <span className="gc-badge gc-badge-green d-flex align-items-center gap-1">
+                      <CheckCircle2 size={12} /> Reviewed
+                    </span>
+                  )}
+
                 </div>
                 
               </div>
@@ -106,12 +127,13 @@ export default function TouristBookings() {
           ))}
         </div>
       )}
+
       {reviewBooking && (
         <ReviewModal
           booking={reviewBooking}
           onClose={() => setReviewBooking(null)}
           onSuccess={() => {
-            load(); // Reloads the bookings list (assuming you have a load() function)
+            load(); 
           }}
         />
       )}

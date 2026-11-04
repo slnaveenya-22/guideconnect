@@ -383,21 +383,18 @@ async function completeBooking(bookingId, guideUserId) {
   if (!booking) {
     const err = new Error('Booking not found');
     err.status = 404;
-    err.code = 'BOOKING_NOT_FOUND';
     throw err;
   }
 
   if (booking.guideProfile.userId !== guideUserId) {
     const err = new Error('Only the guide can complete this booking');
     err.status = 403;
-    err.code = 'FORBIDDEN';
     throw err;
   }
 
   if (booking.status !== 'ACCEPTED') {
     const err = new Error('Only accepted bookings can be completed');
     err.status = 400;
-    err.code = 'INVALID_STATUS_TRANSITION';
     throw err;
   }
 

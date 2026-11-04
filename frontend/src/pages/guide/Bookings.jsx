@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, User, Check, X, Clock, MapPin } from 'lucide-react';
+import { Calendar, User, Check, X, Clock, MapPin, MessageSquare, CheckCircle2 } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { getMyBookings, acceptBooking, rejectBooking } from '../../api/bookings';
+import api from '../../api/axios';
 
 export default function GuideBookings() {
   const [bookings, setBookings] = useState([]);
@@ -24,7 +25,8 @@ export default function GuideBookings() {
     setActioning(id);
     try {
       if (action === 'accept') await acceptBooking(id);
-      else await rejectBooking(id);
+      else if (action === 'reject') await rejectBooking(id);
+      else if (action === 'complete') await api.patch(`/bookings/${id}/complete`);
       load(); // refresh list
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update booking');
@@ -35,6 +37,7 @@ export default function GuideBookings() {
 
   const pending = bookings.filter(b => b.status === 'PENDING');
   const accepted = bookings.filter(b => b.status === 'ACCEPTED');
+  const completed = bookings.filter(b => b.status === 'COMPLETED');
 
   return (
     <DashboardLayout title="Booking Requests" subtitle="Manage incoming tour requests">
@@ -48,6 +51,7 @@ export default function GuideBookings() {
         </div>
       )}
 
+      {/* ===== PENDING REQUESTS ===== */}
       {!loading && pending.length > 0 && (
         <>
           <h6 style={{ fontWeight: 700, color: 'var(--gc-navy)', marginBottom: '1rem' }}>Pending Requests ({pending.length})</h6>
@@ -73,18 +77,10 @@ export default function GuideBookings() {
                     )}
                   </div>
                   <div className="d-flex align-items-center gap-2">
-                    <button 
-                      className="btn btn-outline-danger btn-sm flex-grow-1" 
-                      onClick={() => handleAction(b.id, 'reject')}
-                      disabled={actioning === b.id}
-                    >
+                    <button className="btn btn-outline-danger btn-sm flex-grow-1" onClick={() => handleAction(b.id, 'reject')} disabled={actioning === b.id}>
                       <X size={14} className="me-1" /> Decline
                     </button>
-                    <button 
-                      className="btn btn-success btn-sm flex-grow-1" 
-                      onClick={() => handleAction(b.id, 'accept')}
-                      disabled={actioning === b.id}
-                    >
+                    <button className="btn btn-success btn-sm flex-grow-1" onClick={() => handleAction(b.id, 'accept')} disabled={actioning === b.id}>
                       <Check size={14} className="me-1" /> Accept
                     </button>
                   </div>
@@ -95,10 +91,11 @@ export default function GuideBookings() {
         </>
       )}
 
+      {/* ===== UPCOMING CONFIRMED TOURS ===== */}
       {!loading && accepted.length > 0 && (
         <>
           <h6 style={{ fontWeight: 700, color: 'var(--gc-navy)', marginBottom: '1rem' }}>Upcoming Confirmed Tours</h6>
-          <div className="d-flex flex-column gap-3">
+          <div className="d-flex flex-column gap-3 mb-5">
             {accepted.map(b => (
               <div key={b.id} className="card p-3">
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
@@ -113,10 +110,46 @@ export default function GuideBookings() {
                   </div>
                   <div className="d-flex gap-2">
                     <Link to={`/guide/itinerary/${b.id}`} className="btn btn-sm btn-outline-navy">
-                      <MapPin size={14} className="me-1" /> Manage Itinerary
+                      <MapPin size={14} className="me-1" /> Itinerary
                     </Link>
                     <Link to={`/guide/messages/${b.id}`} className="btn btn-sm btn-primary">
-                      Message Tourist
+                      <MessageSquare size={14} className="me-1" /> Message
+                    </Link>
+                    <button 
+                      className="btn btn-sm btn-success"
+                      onClick={() => handleAction(b.id, 'complete')}
+                      disabled={actioning === b.id}
+                    >
+                      <CheckCircle2 size={14} className="me-1" /> Mark Completed
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ===== COMPLETED TOURS ===== */}
+      {!loading && completed.length > 0 && (
+        <>
+          <h6 style={{ fontWeight: 700, color: 'var(--gc-navy)', marginBottom: '1rem' }}>Past Completed Tours</h6>
+          <div className="d-flex flex-column gap-3">
+            {completed.map(b => (
+              <div key={b.id} className="card p-3" style={{ opacity: 0.8 }}>
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                  <div>
+                    <div className="d-flex align-items-center gap-2 mb-1">
+                      <span className="gc-badge gc-badge-blue">Completed</span>
+                      <span style={{ fontWeight: 700 }}>{b.experience?.title}</span>
+                    </div>
+                    <div className="text-muted-2" style={{ fontSize: '0.85rem' }}>
+                      Tourist: {b.tourist?.name} · {new Date(b.scheduledDate || b.date).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <Link to={`/guide/messages/${b.id}`} className="btn btn-sm btn-outline-navy">
+                      <MessageSquare size={14} className="me-1" /> Message
                     </Link>
                   </div>
                 </div>
