@@ -73,8 +73,8 @@ export default function TouristBookings() {
                 </div>
 
                 <div className="d-flex gap-2">
-                  <Link to={`/experiences/${b.experience.id}`} className="btn btn-sm btn-outline-navy">
-                    View Tour
+                  <Link to={`/tourist/bookings/${b.id}`} className="btn btn-sm btn-outline-navy">
+                    View Details
                   </Link>
                   {b.status === 'PENDING' && (
                     <button className="btn btn-sm btn-ghost text-danger" onClick={() => handleCancel(b.id)}>

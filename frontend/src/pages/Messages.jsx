@@ -116,7 +116,7 @@ export default function Messages() {
                         {otherParty?.name}
                       </h6>
                       <small className="text-muted-2" style={{ fontSize: '0.75rem' }}>
-                        {new Date(booking.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                        {new Date(booking.scheduledDate || booking.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
                       </small>
                     </div>
                     <div className="text-muted-2 text-truncate d-flex align-items-center gap-2" style={{ fontSize: '0.85rem' }}>

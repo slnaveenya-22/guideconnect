@@ -74,7 +74,7 @@ export default function TouristDashboard() {
               </h5>
               <div className="text-muted-2 d-flex gap-3" style={{ fontSize: '0.9rem' }}>
                 <span><MapPin size={14} className="me-1" />{nextTrip.experience?.city}</span>
-                <span><Calendar size={14} className="me-1" />{new Date(nextTrip.date).toLocaleDateString()}</span>
+                <span><Calendar size={14} className="me-1" />{new Date(nextTrip.scheduledDate || nextTrip.date).toLocaleDateString()}</span>
               </div>
             </div>
             <Link to="/tourist/bookings" className="btn btn-outline-navy btn-sm">

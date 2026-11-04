@@ -63,7 +63,7 @@ export default function GuideBookings() {
                       <span style={{ fontWeight: 700 }}>{b.experience?.title}</span>
                     </div>
                     <div className="text-muted-2 d-flex flex-wrap gap-3" style={{ fontSize: '0.85rem' }}>
-                      <span><Calendar size={13} className="me-1"/>{new Date(b.date).toLocaleDateString()}</span>
+                      <span><Calendar size={13} className="me-1"/>{new Date(b.scheduledDate || b.date).toLocaleDateString()}</span>
                       <span>Guests: {b.groupSize}</span>
                     </div>
                     {b.message && (
@@ -108,15 +108,15 @@ export default function GuideBookings() {
                       <span style={{ fontWeight: 700 }}>{b.experience?.title}</span>
                     </div>
                     <div className="text-muted-2" style={{ fontSize: '0.85rem' }}>
-                      Tourist: {b.tourist?.name} · {new Date(b.date).toLocaleDateString()} · {b.groupSize} guests
+                      Tourist: {b.tourist?.name} · {new Date(b.scheduledDate || b.date).toLocaleDateString()} · {b.groupSize} guests
                     </div>
                   </div>
-                  <div className="d-flex gap-2 mt-2 mt-md-0">
+                  <div className="d-flex gap-2">
                     <Link to={`/guide/itinerary/${b.id}`} className="btn btn-sm btn-outline-navy">
-                        <MapPin size={14} className="me-1" /> Build Itinerary
+                      <MapPin size={14} className="me-1" /> Manage Itinerary
                     </Link>
                     <Link to={`/guide/messages/${b.id}`} className="btn btn-sm btn-primary">
-                        Message Tourist
+                      Message Tourist
                     </Link>
                   </div>
                 </div>
