@@ -129,14 +129,6 @@ export default function GuideExperiences() {
                       >
                         <Calendar size={15} />
                       </button>
-
-                      <button
-                        className="btn btn-sm btn-ghost me-1"
-                        title={exp.isActive ? 'Deactivate' : 'Activate'}
-                        onClick={() => toggleActive(exp)}
-                      >
-                        {exp.isActive ? <EyeOff size={15} /> : <Eye size={15} />}
-                      </button>
                       <button
                         className="btn btn-sm btn-ghost me-1"
                         onClick={() => navigate(`/guide/experiences/${exp.id}/edit`)}

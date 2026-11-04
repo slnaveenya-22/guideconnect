@@ -42,8 +42,14 @@ export default function TouristReviews() {
                     <div style={{ fontWeight: 700, color: 'var(--gc-navy)' }}>
                       {rev.booking?.experience?.title || 'Experience'}
                     </div>
+                    {/* Change it to this: */}
                     <div className="text-muted-2" style={{ fontSize: '0.85rem' }}>
-                      Guide: {rev.booking?.guide?.name}
+                      Guide: {
+                        rev.guideProfile?.user?.name || 
+                        rev.booking?.guideProfile?.user?.name || 
+                        rev.booking?.guide?.name || 
+                        'Unknown'
+                      }
                     </div>
                   </div>
                   <div className="text-warning">

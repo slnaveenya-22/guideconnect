@@ -3,9 +3,14 @@ import { Clock, MapPin, Users, Star } from 'lucide-react';
 import CategoryBadge from './CategoryBadge';
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=600&q=80';
+const getImageUrl = (url) => {
+  if (!url) return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=600&q=80';
+  if (url.startsWith('http')) return url; // Cloudinary or external URL
+  return `http://localhost:5000/${url.replace(/\\/g, '/')}`; // Local upload
+};
 
 export default function ExperienceCard({ exp, showGuide = false }) {
-  const image = exp.images?.[0] || PLACEHOLDER;
+  const image = getImageUrl(exp.images?.[0]);
   const price = exp.price ? Math.round(exp.price / 100) : 0;
   const hours = Math.floor(exp.durationMinutes / 60);
   const mins = exp.durationMinutes % 60;
