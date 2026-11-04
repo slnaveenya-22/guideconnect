@@ -58,15 +58,15 @@ export default function ChatWindow() {
 
     socket.on('connect', () => {
       console.log('✅ Socket connected');
-      // Join the specific room for this conversation
-      socket.emit('join_conversation', conversation.id);
+      // ✅ FIX 1: Match backend event name
+      socket.emit('conversation:join', conversation.id, (res) => {
+        console.log('Joined room:', res);
+      });
     });
 
-    // Listen for incoming messages
-    socket.on('new_message', (message) => {
-      // Add message if it's not from us (or even if it is, to be safe)
+    // ✅ FIX 2: Match backend event name
+    socket.on('message:new', (message) => {
       setMessages((prev) => {
-        // Prevent duplicates (in case the sender also gets the socket event)
         if (prev.some(m => m.id === message.id)) return prev;
         return [...prev, message];
       });
@@ -78,7 +78,6 @@ export default function ChatWindow() {
 
     return () => {
       if (socket) {
-        socket.emit('leave_conversation', conversation.id);
         socket.disconnect();
       }
     };
@@ -99,10 +98,14 @@ export default function ChatWindow() {
       content: input.trim(),
     };
 
-    // Emit via socket
-    socket.emit('send_message', messageData);
-    
-    setInput('');
+    // ✅ FIX 3: Match backend event name and handle callback
+    socket.emit('message:send', messageData, (res) => {
+      if (res.success) {
+        setInput(''); // Clear input only if successful
+      } else {
+        alert('Failed to send message: ' + res.message);
+      }
+    });
   }
 
   const otherParty = user?.role === 'GUIDE' ? conversation?.tourist : conversation?.guide;
@@ -113,7 +116,7 @@ export default function ChatWindow() {
     return (
       <DashboardLayout title="Messages">
         <div className="text-center py-5 text-muted-2">
-          <Loader2 size={32} className="spinner-border text-primary mb-3 border-0" style={{ animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={32} className="spinner-border text-primary mb-3 border-0" />
           <p>Loading conversation...</p>
         </div>
       </DashboardLayout>
@@ -153,7 +156,7 @@ export default function ChatWindow() {
           </div>
           <div>
             <h6 style={{ margin: 0, fontWeight: 700, color: 'var(--gc-navy)' }}>
-              {otherParty?.name}
+              {otherParty?.name || 'Chat'}
             </h6>
             <small className="text-muted-2">Re: {conversation?.booking?.experience?.title || 'Experience'}</small>
           </div>
@@ -177,8 +180,8 @@ export default function ChatWindow() {
             </div>
           ) : (
             messages.map((msg) => {
-              // Check if message is from current user
-              const isMe = msg.senderId === user.id;
+              // ✅ FIX 4: Check sender.id since the backend includes the nested sender object
+              const isMe = msg.sender?.id === user.id || msg.senderId === user.id;
               
               return (
                 <div 

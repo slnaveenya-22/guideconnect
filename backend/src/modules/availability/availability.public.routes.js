@@ -5,10 +5,13 @@ const prisma = require('../../config/prisma');
 // GET /api/experiences/:experienceId/availability
 router.get('/:experienceId/availability', async (req, res, next) => {
   try {
+    const experienceId = parseInt(req.params.experienceId);
+
+    // Kavya updated the schema so Availability links directly to Experience!
     const slots = await prisma.availability.findMany({
-      where: { 
-        experienceId: parseInt(req.params.experienceId),
-        date: { gte: new Date() } // Only fetch future dates
+      where: {
+        experienceId: experienceId,
+        date: { gte: new Date() },
       },
       orderBy: { date: 'asc' },
     });

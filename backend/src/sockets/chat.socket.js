@@ -43,8 +43,10 @@ function setupChatSocket(io) {
         }
 
         const { booking } = conversation;
-        const isTourist = booking.touristId === socket.user.id;
-        const isGuide = booking.guideProfile.userId === socket.user.id;
+        
+        // ✅ FIX 1: Convert both to integers so 1 === 1 is true
+        const isTourist = parseInt(booking.touristId) === parseInt(socket.user.id);
+        const isGuide = parseInt(booking.guideProfile.userId) === parseInt(socket.user.id);
 
         if (!isTourist && !isGuide) {
           return callback?.({ success: false, message: 'Forbidden' });
@@ -74,8 +76,10 @@ function setupChatSocket(io) {
         }
 
         const { booking } = conversation;
-        const isTourist = booking.touristId === socket.user.id;
-        const isGuide = booking.guideProfile.userId === socket.user.id;
+        
+        // ✅ FIX 2: Convert both to integers here too
+        const isTourist = parseInt(booking.touristId) === parseInt(socket.user.id);
+        const isGuide = parseInt(booking.guideProfile.userId) === parseInt(socket.user.id);
 
         if (!isTourist && !isGuide) {
           return callback?.({ success: false, message: 'Forbidden' });
