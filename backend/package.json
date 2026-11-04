@@ -31,11 +31,8 @@
     "google-auth-library": "^11.3.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.5.0",
-<<<<<<< HEAD
-    "nodemailer": "^10.3.1",
-=======
     "multer-storage-cloudinary": "^4.0.0",
->>>>>>> d26e88153f8b4713af291b57ddd94f32106f11e4
+    "nodemailer": "^10.3.1",
     "socket.io": "^4.8.4"
   },
   "devDependencies": {
