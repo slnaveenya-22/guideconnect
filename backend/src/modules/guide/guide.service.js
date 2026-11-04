@@ -84,54 +84,45 @@ async function listGuides(query) {
   const limit = Math.min(50, Math.max(1, parseInt(query.limit) || 12));
   const skip = (page - 1) * limit;
 
-  const where = {
-    // We are temporarily allowing PENDING/NOT_SUBMITTED so you can see them while testing!
-    verificationStatus: { in: ['APPROVED', 'PENDING', 'NOT_SUBMITTED'] },
-  };
-
-  if (query.city) {
-    where.city = { contains: query.city }; // Prisma + MySQL handles this via UTF-8 collation usually
-  }
-
-  if (query.maxPrice) {
-    where.hourlyRate = { lte: parseInt(query.maxPrice) };
-  }
-
-  if (query.minRating) {
-    where.avgRating = { gte: parseFloat(query.minRating) };
-  }
-
   let orderBy = { avgRating: 'desc' };
   if (query.sort === 'price_asc') orderBy = { hourlyRate: 'asc' };
   else if (query.sort === 'price_desc') orderBy = { hourlyRate: 'desc' };
   else if (query.sort === 'newest') orderBy = { createdAt: 'desc' };
 
-  // Fetch WITHOUT the city filter first so we can do case-insensitive filtering in JS
-  const [allGuides, total] = await Promise.all([
-    prisma.guideProfile.findMany({
-      where: {
-        verificationStatus: { in: ['APPROVED', 'PENDING', 'NOT_SUBMITTED'] },
-        ...(query.maxPrice && { hourlyRate: { lte: parseInt(query.maxPrice) } }),
-        ...(query.minRating && { avgRating: { gte: parseFloat(query.minRating) } }),
-      },
-      orderBy,
-      include: {
-        user: { select: { id: true, name: true } },
-      },
-    }),
-    prisma.guideProfile.count(),
-  ]);
+  // Fetch ALL guides (we do the filtering in JS to avoid MySQL case-sensitivity bugs)
+  const allGuides = await prisma.guideProfile.findMany({
+    where: {
+      verificationStatus: { in: ['APPROVED', 'PENDING', 'NOT_SUBMITTED'] },
+    },
+    orderBy,
+    include: {
+      user: { select: { id: true, name: true } },
+    },
+  });
 
-  // Filter in JS to fix the case-sensitivity issue
   let filtered = allGuides;
   
+  // 1. Filter by City (only check the main city they live in)
   if (query.city) {
-    where.OR = [
-      { city: { contains: query.city } },       
-      { serviceAreas: { contains: query.city } },
-    ];
+    const searchCity = query.city.toLowerCase();
+    filtered = filtered.filter((g) => {
+      return g.city.toLowerCase().includes(searchCity);
+    });
   }
 
+  // 2. Filter by Max Price
+  if (query.maxPrice) {
+    const maxPrice = parseInt(query.maxPrice);
+    filtered = filtered.filter((g) => g.hourlyRate && g.hourlyRate <= maxPrice);
+  }
+
+  // 3. Filter by Min Rating
+  if (query.minRating) {
+    const minRating = parseFloat(query.minRating);
+    filtered = filtered.filter((g) => g.avgRating >= minRating);
+  }
+
+  // 4. Filter by Language
   if (query.language) {
     const searchLang = query.language.toLowerCase();
     filtered = filtered.filter(
@@ -139,6 +130,7 @@ async function listGuides(query) {
     );
   }
 
+  // 5. Filter by Expertise
   if (query.expertise) {
     const searchExp = query.expertise.toLowerCase();
     filtered = filtered.filter(
@@ -146,6 +138,7 @@ async function listGuides(query) {
     );
   }
 
+  // 6. Filter by Search Text (q)
   if (query.q) {
     const q = query.q.toLowerCase();
     filtered = filtered.filter(
@@ -155,7 +148,8 @@ async function listGuides(query) {
     );
   }
 
-  // Paginate the filtered results
+  // Paginate the final filtered results
+  const total = filtered.length;
   const paginated = filtered.slice(skip, skip + limit);
 
   const data = paginated.map((g) => ({
@@ -180,8 +174,8 @@ async function listGuides(query) {
     pagination: {
       page,
       limit,
-      total: filtered.length,
-      totalPages: Math.ceil(filtered.length / limit),
+      total,
+      totalPages: Math.ceil(total / limit),
     },
   };
 }
