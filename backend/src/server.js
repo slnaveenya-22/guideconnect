@@ -91,6 +91,8 @@ app.use('/api/admin', adminVerificationRoutes);
 const adminModerationRoutes = require('./modules/admin/admin.routes');
 app.use('/api/admin', adminModerationRoutes);
 
+app.use('/api/bookings', itineraryRoutes);
+
 // 404
 app.use((req, res) => {
   res.status(404).json({

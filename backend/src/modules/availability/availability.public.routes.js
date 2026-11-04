@@ -7,11 +7,15 @@ router.get('/:experienceId/availability', async (req, res, next) => {
   try {
     const experienceId = parseInt(req.params.experienceId);
 
-    // Kavya updated the schema so Availability links directly to Experience!
+    // 1. Set "today" to midnight (00:00:00)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 2. Fetch slots that are today or in the future
     const slots = await prisma.availability.findMany({
       where: {
         experienceId: experienceId,
-        date: { gte: new Date() },
+        date: { gte: today }, // 👈 This now includes today's slots
       },
       orderBy: { date: 'asc' },
     });

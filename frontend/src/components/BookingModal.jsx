@@ -40,9 +40,13 @@ export default function BookingModal({ experience, onClose, onSuccess }) {
   useEffect(() => {
     getPublicExperienceAvailability(experience.id)
       .then((slots) => {
+        // Log what the backend actually sends back
+        console.log("🚨 Received availability slots from backend:", slots);
         setAvailableSlots(slots || []);
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error("Failed to fetch availability", err);
+      })
       .finally(() => setLoadingAvail(false));
   }, [experience]);
 
